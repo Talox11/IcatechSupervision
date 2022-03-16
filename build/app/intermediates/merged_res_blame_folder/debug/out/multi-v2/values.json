@@ -1,8 +1,27 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\talob\\Desktop\\Nueva carpeta (2)\\digital-banking-app-mobile-side\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
+            "outputFile": "D:\\ICATECH\\mobile\\IcatechMovil\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
             "map": [
+                {
+                    "source": "D:\\ICATECH\\mobile\\IcatechMovil\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "3,14",
+                        "startColumns": "4,4",
+                        "startOffsets": "176,830",
+                        "endLines": "7,16",
+                        "endColumns": "12,12",
+                        "endOffsets": "472,996"
+                    },
+                    "to": {
+                        "startLines": "93,98",
+                        "startColumns": "4,4",
+                        "startOffsets": "5462,5759",
+                        "endLines": "97,100",
+                        "endColumns": "12,12",
+                        "endOffsets": "5754,5923"
+                    }
+                },
                 {
                     "source": "C:\\Users\\talob\\.gradle\\caches\\transforms-2\\files-2.1\\67ff0aaf930f65024e6c37d99bc9e852\\core-1.6.0\\res\\values\\values.xml",
                     "from": {
@@ -39,25 +58,6 @@
                         "endLines": "7,8,9,10,72,121,125,274,291,299",
                         "endColumns": "11,59,51,44,59,24,24,24,24,24",
                         "endOffsets": "289,349,401,446,4387,7238,7435,16396,17510,17903"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\talob\\Desktop\\Nueva carpeta (2)\\digital-banking-app-mobile-side\\android\\app\\src\\main\\res\\values\\styles.xml",
-                    "from": {
-                        "startLines": "3,14",
-                        "startColumns": "4,4",
-                        "startOffsets": "176,830",
-                        "endLines": "7,16",
-                        "endColumns": "12,12",
-                        "endOffsets": "472,996"
-                    },
-                    "to": {
-                        "startLines": "93,98",
-                        "startColumns": "4,4",
-                        "startOffsets": "5462,5759",
-                        "endLines": "97,100",
-                        "endColumns": "12,12",
-                        "endOffsets": "5754,5923"
                     }
                 }
             ]

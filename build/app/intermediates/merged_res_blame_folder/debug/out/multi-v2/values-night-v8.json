@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\talob\\Desktop\\Nueva carpeta (2)\\digital-banking-app-mobile-side\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-night-v8\\values-night-v8.xml",
+            "outputFile": "D:\\ICATECH\\mobile\\IcatechMovil\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-night-v8\\values-night-v8.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\talob\\Desktop\\Nueva carpeta (2)\\digital-banking-app-mobile-side\\android\\app\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "D:\\ICATECH\\mobile\\IcatechMovil\\android\\app\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",
