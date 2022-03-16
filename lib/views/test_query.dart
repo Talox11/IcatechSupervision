@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_banking_app/models/grupoJson.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 
