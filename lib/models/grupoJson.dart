@@ -1,17 +1,17 @@
 class GrupoJson {
-  int idRegistro;
-  String curso;
-  String cct;
-  String unidad;
-  String clave;
-  String mod;
-  String inicio;
-  String termino;
-  String area;
-  String espe;
-  String tcapacitacion;
-  String depen;
-  String tipoCurso;
+  int idRegistro = 0;
+  String curso = '';
+  String cct = '';
+  String unidad = '';
+  String clave = '';
+  String mod = '';
+  String inicio = '';
+  String termino = '';
+  String area = '';
+  String espe = '';
+  String tcapacitacion = '';
+  String depen = '';
+  String tipoCurso = '';
 
   GrupoJson(
       this.idRegistro,
@@ -43,5 +43,21 @@ class GrupoJson {
       'depen':depen,
       'tipoCurso':tipoCurso,
     };
+
+    GrupoJson.fromJson(Map<String, dynamic> json){
+      idRegistro = int.parse(json['id_registro']);
+      curso = json['curso'];
+      cct = json['cct'];
+      unidad = json['unidad'];
+      clave = json['clave'];
+      mod = json['mod'];
+      inicio = json['inicio'];
+      termino = json['termino'];
+      area = json['area'];
+      espe = json['espe'];
+      tcapacitacion = json['tcapacitacion'];
+      depen = json['depen'];
+      tipoCurso = json['tipoCurso'];
+    }
   
 }

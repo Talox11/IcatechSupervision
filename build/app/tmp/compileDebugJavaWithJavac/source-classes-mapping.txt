@@ -1,6 +1,0 @@
-io/flutter/plugins/GeneratedPluginRegistrant.java
- io.flutter.plugins.GeneratedPluginRegistrant
-co/tino/flutter_banking_app/BuildConfig.java
- co.tino.flutter_banking_app.BuildConfig
-co/tino/flutter_banking_app/MainActivity.java
- co.tino.flutter_banking_app.MainActivity
