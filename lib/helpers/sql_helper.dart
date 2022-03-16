@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_banking_app/models/grupoJson.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
 class SQLHelper {
@@ -66,12 +67,14 @@ class SQLHelper {
     );
   }
 
-  static Future<int> createItem(int idRegistro, String? curso, String? cct, String? unidad, String? clave, String? mod, String? inicio, String? termino, String? area) async {
+  static Future<int> insertGrupo(GrupoJson grupoJson) async {
     final db = await SQLHelper.db();
 
-    final data = {'id_registro': idRegistro, 'curso': curso, 'cct': cct, 'unidad':unidad, 'clave': clave, 'mod': mod};
-    final id = await db.insert('items', data,
+    final data = grupoJson.toJson() as Map<String, dynamic>;
+    final resultQuery = await db.insert('tbl_grupo_offline', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    return id;
+    return resultQuery;
   }
+
+  
 }
