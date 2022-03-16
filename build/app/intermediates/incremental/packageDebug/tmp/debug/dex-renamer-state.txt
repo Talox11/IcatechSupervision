@@ -1,0 +1,4 @@
+#Wed Mar 16 09:13:13 CST 2022
+base.0=C\:\\Users\\talob\\Desktop\\Nueva carpeta (2)\\digital-banking-app-mobile-side\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
