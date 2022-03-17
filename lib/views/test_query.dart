@@ -48,8 +48,8 @@ class _TestQueryState extends State<TestQuery> {
     try {
       result = await _connectivity.checkConnectivity();
     } on PlatformException catch (e) {
-      print('Couldn\'t check connectivity status');
-      return;
+      print('Couldn\'t check connectivity status $e');
+      return ;
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -182,13 +182,14 @@ void testQuery2() async {
   Database database = await openDatabase(path,
       version: 1, onCreate: (Database db, int version) async {});
 
-  List<Map> grupos = await database.rawQuery('SELECT * FROM tbl_grupo_offline');
+  List<Map> grupos =
+      await database.rawQuery('SELECT COUNT(*) FROM tbl_grupo_offline');
   List<Map> inscripcion =
-      await database.rawQuery('SELECT * FROM tbl_inscripcion_offline');
+      await database.rawQuery('SELECT COUNT(*) FROM tbl_inscripcion_offline');
   List<Map> alumnos =
-      await database.rawQuery('SELECT * FROM alumnos_pre_offline');
+      await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_offline');
 
-print('============== grupos');
+  print('============== grupos');
   for (var item in grupos) {
     print(item);
   }
@@ -196,7 +197,7 @@ print('============== grupos');
   for (var item in inscripcion) {
     print(item);
   }
-print('============== alumnos');
+  print('============== alumnos');
   for (var item in alumnos) {
     print(item);
   }

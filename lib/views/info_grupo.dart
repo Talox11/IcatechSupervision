@@ -15,8 +15,8 @@ import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
 
 class InfoGrupo extends StatefulWidget {
-  final String curp;
-  const InfoGrupo({Key? key, required this.curp}) : super(key: key);
+  final String clave;
+  const InfoGrupo({Key? key, required this.clave}) : super(key: key);
 
   @override
   State<InfoGrupo> createState() => _InfoGrupoState();
@@ -31,7 +31,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, String>{'clave': widget.curp}),
+      body: jsonEncode(<String, String>{'clave': widget.clave}),
     );
 
     if (response.statusCode == 201) {
@@ -39,7 +39,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
       // then parse the JSON.
       String body = utf8.decode(response.bodyBytes);
       final jsonData = jsonDecode(body);
-
+      // print(jsonData);
       _listAlumnos = await _getAlumnos(jsonData[0]['id']);
       // print(_listAlumnos);
 
@@ -272,8 +272,9 @@ Future<List> _getAlumnos(clave) async {
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
     final jsonData = jsonDecode(body);
+    // print(jsonData);
     // print(jsonData['rows']);
-    return jsonData['rows'];
+    return jsonData;
   } else {
     throw Exception('Falló la conexión');
   }

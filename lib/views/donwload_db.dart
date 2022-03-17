@@ -9,7 +9,7 @@ import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
-import 'package:gap/gap.dart';
+
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -31,21 +31,6 @@ class _DownloadDBState extends State<DownloadDB> {
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
-
-  Future<List> _getInfoGrupo() async {
-    final response =
-        await http.get(Uri.parse('http://10.0.2.2:5000/list/grupo'));
-
-    if (response.statusCode == 201) {
-      String body = utf8.decode(response.bodyBytes);
-      final jsonData = jsonDecode(body);
-      // final data = GrupoJson.fromJson(jsonData);
-
-      return jsonDecode(body);
-    } else {
-      throw Exception('Failed to create album.');
-    }
-  }
 
   @override
   void initState() {

@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +14,7 @@ import 'package:flutter_banking_app/views/info_grupo.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
-import 'package:http/http.dart' as http;
+
 
 class Wallet extends StatefulWidget {
   const Wallet({Key? key}) : super(key: key);
@@ -29,41 +29,6 @@ class _WalletState extends State<Wallet> {
 
   late Grupo grupoObject;
 
-  Future<Grupo> _getGrupo(String clave) async {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:5000/curso/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'clave': _controller.text,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
-      String body = utf8.decode(response.bodyBytes);
-      final jsonData = jsonDecode(body);
-      
-      Grupo grupo = Grupo(
-          jsonData[0]['id'],
-          jsonData[0]['curso'],
-          jsonData[0]['cct'],
-          jsonData[0]['unidad'],
-          jsonData[0]['clave'],
-          jsonData[0]['inicio'],
-          jsonData[0]['termino']);
-      grupoObject = grupo;
-      
-      return grupo;
-    } else {
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
-
-      throw Exception('Failed to create album.');
-    }
-  }
 
   @override
   void initState() {
@@ -111,7 +76,7 @@ class _WalletState extends State<Wallet> {
                       Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => InfoGrupo(curp: _controller.text),
+                        builder: (context) => InfoGrupo(clave: _controller.text),
                       ));
                   },
                   child: CircleAvatar(
@@ -162,7 +127,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
                   width: 60, height: 45, fit: BoxFit.cover),
               const Padding(
                 padding: EdgeInsets.only(top: 20, right: 5),
-                child: Text('\2.00 DHS',
+                child: Text('2.00 DHS',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 21,

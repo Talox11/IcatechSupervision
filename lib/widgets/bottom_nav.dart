@@ -4,7 +4,7 @@ import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/views/home.dart';
 import 'package:flutter_banking_app/views/profile.dart';
-import 'package:flutter_banking_app/views/stats.dart';
+
 import 'package:flutter_banking_app/views/test_query.dart';
 import 'package:flutter_banking_app/views/wallet.dart';
 

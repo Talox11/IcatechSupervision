@@ -201,8 +201,8 @@ showDownloadDBDialog(BuildContext context) {
   );
   Widget continueButton = TextButton(
     child: const Text('Continuar'),
-    onPressed: () {
-      downloadDB();
+    onPressed: () async {
+      await downloadDB();
       Navigator.pop(context);
     },
   );
@@ -269,11 +269,13 @@ Future<List> downloadDB() async {
   late List _listAlumnosInscritos = [];
   late List _listAlumnosPre = [];
   // saveDB(jsonData);
+  print('dowloading DB');
   _listGrupos = await _getGrupos();
   _listAlumnosInscritos = await _getAlumnosInscritos();
   _listAlumnosPre = await _getAlumnosPre();
 
-  saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
+  await saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
+  print('done');
   return [
     {'done'}
   ];
@@ -314,7 +316,7 @@ Future<List> _getAlumnosPre() async {
   }
 }
 
-void saveDB(grupos, alumnosIns, alumnosPre) async {
+Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
   await deleteDatabase(path);
@@ -390,7 +392,7 @@ void saveDB(grupos, alumnosIns, alumnosPre) async {
             item['tipo_curso']
           ]);
     }
-    print('inserted grupos');
+    print('inserted grupos  rows: ${grupos.length}');
 
     for (var item in alumnosIns) {
       await txn.rawInsert(
@@ -398,7 +400,7 @@ void saveDB(grupos, alumnosIns, alumnosPre) async {
           'VALUES(?, ?, ?, ?)',
           [item['id'], item['matricula'], item['alumno'], item['curp']]);
     }
-    print('inserted alunnos ins');
+    print('inserted alumnos rows: ${alumnosIns.length}');
 
     for (var item in alumnosPre) {
       await txn.rawInsert(
@@ -422,6 +424,10 @@ void saveDB(grupos, alumnosIns, alumnosPre) async {
             item['matricula']
           ]);
     }
-    print('inserted alumnos pre');
+    print('inserted alumnos pre rows: ${alumnosPre.length}');
   });
+
+  return [
+    {'done'}
+  ];
 }
