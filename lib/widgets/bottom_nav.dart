@@ -5,6 +5,7 @@ import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/views/home.dart';
 import 'package:flutter_banking_app/views/profile.dart';
 import 'package:flutter_banking_app/views/stats.dart';
+import 'package:flutter_banking_app/views/test_query.dart';
 import 'package:flutter_banking_app/views/wallet.dart';
 
 /// This is the stateful widget that the main application instantiates.
@@ -21,7 +22,7 @@ class _BottomNavState extends State<BottomNav> {
   static final List<Widget> _widgetOptions = <Widget>[
     const Home(),
     const Wallet(),
-    const Stats(),
+    const TestQuery(),
     const Profile(),
   ];
 

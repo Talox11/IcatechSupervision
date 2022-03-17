@@ -31,6 +31,7 @@ class SQLHelper {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
 
+
       CREATE TABLE IF NOT EXISTS alumnos_pre_offline(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         id_registro INTEGER,
@@ -75,6 +76,4 @@ class SQLHelper {
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     return resultQuery;
   }
-
-  
 }

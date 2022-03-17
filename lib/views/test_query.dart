@@ -30,22 +30,6 @@ class _TestQueryState extends State<TestQuery> {
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
-
-  Future<List> _getInfoGrupo() async {
-    final response =
-        await http.get(Uri.parse('http://10.0.2.2:5000/list/grupo'));
-
-    if (response.statusCode == 201) {
-      String body = utf8.decode(response.bodyBytes);
-      final jsonData = jsonDecode(body);
-      // final data = GrupoJson.fromJson(jsonData);
-
-      return jsonDecode(body);
-    } else {
-      throw Exception('Failed to create album.');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -191,17 +175,29 @@ void testQuery() async {
 
 void testQuery2() async {
   var databasesPath = await getDatabasesPath();
-  String path = join(databasesPath, 'demo.db');
+  String path = join(databasesPath, 'syvic_offline.db');
 
 // open the database
 
-  Database database = await openDatabase(path, version: 1,
-      onCreate: (Database db, int version) async {
-    // When creating the db, create the table
-    await db.execute(
-        'CREATE TABLE IF DONT EXIST Test (id INTEGER PRIMARY KEY, name TEXT, value INTEGER, num REAL)');
-  });
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
 
-  List<Map> list = await database.rawQuery('SELECT * FROM Test');
-  print(list);
+  List<Map> grupos = await database.rawQuery('SELECT * FROM tbl_grupo_offline');
+  List<Map> inscripcion =
+      await database.rawQuery('SELECT * FROM tbl_inscripcion_offline');
+  List<Map> alumnos =
+      await database.rawQuery('SELECT * FROM alumnos_pre_offline');
+
+print('============== grupos');
+  for (var item in grupos) {
+    print(item);
+  }
+  print('============== inscritor');
+  for (var item in inscripcion) {
+    print(item);
+  }
+print('============== alumnos');
+  for (var item in alumnos) {
+    print(item);
+  }
 }
