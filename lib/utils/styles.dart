@@ -12,6 +12,9 @@ class Styles {
   static Color whiteColor = Colors.white;
   static Color buttonColor = const Color(0xFF4C66EE);
   static Color blueColor = const Color(0xFF4BACF7);
+  static Color icatechGoldColor = Color.fromARGB(255, 178, 158, 90);
+  static Color icatechGrayColor = Color.fromARGB(255, 49, 53, 55);
+  static Color icatechPurpleColor = Color.fromARGB(255, 97, 16, 48);
   static TextStyle textStyle =
       TextStyle(fontSize: getProportionateScreenWidth(15));
   static TextStyle titleStyle = TextStyle(

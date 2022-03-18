@@ -179,7 +179,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: size.width * 0.90,
+                  width: size.width * 0.05,
                   padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.horizontal(
@@ -209,7 +209,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
                   ),
                 ),
                 Container(
-                  width: size.width * 0.10,
+                  width: size.width * 0.95,
                   padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.horizontal(
@@ -292,7 +292,7 @@ Future<bool> checkInternetConnection() async {
       connectivityResult == ConnectivityResult.wifi) {
     return true;
   } else {
-    print('no connection to internet :(');
+    print('no connection to internet');
     return false;
   }
 }
@@ -313,9 +313,6 @@ Future<Grupo> getInfoGrupoFromLocalDB(clave) async {
 
   _listAlumnos =
       await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
-
-  print(dataGrupo[0]['id_registro'].runtimeType);
-  print(_listAlumnos);
   Grupo grupo = Grupo(
       dataGrupo[0]['id_registro'].toString(),
       dataGrupo[0]['curso'],
