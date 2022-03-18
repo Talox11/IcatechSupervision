@@ -8,6 +8,7 @@ import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/size_config.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
+import 'package:flutter_banking_app/views/loadingIndicator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
@@ -21,6 +22,20 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool visible = true;
+
+  loadProgress() {
+    if (visible == true) {
+      setState(() {
+        visible = false;
+      });
+    } else {
+      setState(() {
+        visible = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
@@ -58,19 +73,6 @@ class _HomeState extends State<Home> {
                               fontWeight: FontWeight.bold))
                     ],
                   ),
-                  InkWell(
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: Icon(
-                        IconlyBold.Notification,
-                        color: Styles.accentColor,
-                      ),
-                    ),
-                  )
                 ],
               ),
               const Gap(25),
@@ -189,43 +191,62 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
 
-showDownloadDBDialog(BuildContext context) {
-  // set up the buttons
-  Widget cancelButton = TextButton(
-    child: const Text('Cancelar'),
-    onPressed: () {
-      Navigator.pop(context);
-    },
-  );
-  Widget continueButton = TextButton(
-    child: const Text('Continuar'),
-    onPressed: () async {
-      await downloadDB();
-      Navigator.pop(context);
-    },
-  );
+  showDownloadDBDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: const Text('Cancelar'),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: const Text('Continuar'),
+      onPressed: () async {
+        DialogBuilder(context).showLoadingIndicator();
+        await downloadDB();
+        Navigator.pop(context);        
+        DialogBuilder(context).hideOpenDialog();
+      },
+    );
 
-  // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    title: const Text('Atencion'),
-    content: const Text(
-        'Descargar la base de datos te permitirá usar la aplicación sin conexión a internet,'
-        ' pero consumirá parte de tu almacenamiento interno, ¿deseas continuar?'),
-    actions: [
-      cancelButton,
-      continueButton,
-    ],
-  );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text('Atencion'),
+      content: const Text(
+          'Descargar la base de datos te permitirá usar la aplicación sin conexión a internet,'
+          ' pero consumirá parte de tu almacenamiento interno, ¿deseas continuar?'),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
 
-  // show the dialog
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showCircularProgress() {
+
+    Column column = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Visibility(
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            visible: visible,
+            child: Container(
+                margin: const EdgeInsets.only(top: 50, bottom: 30),
+                child: const CircularProgressIndicator())),
+      ],
+    );
+  }
 }
 
 showSyncDialog(BuildContext context) {
@@ -248,7 +269,7 @@ showSyncDialog(BuildContext context) {
   AlertDialog alert = AlertDialog(
     title: const Text('Atencion'),
     content: const Text(
-        'Se sincronizarán tus registros con el servidor, se recomienda usar una conexión Wi-Fi ¿deseas continuar?'),
+        'Se sincronizarán tus registros con el servidor, esto puede tomar varios minutos y se recomienda usar una conexión Wi-Fi ¿deseas continuar?'),
     actions: [
       cancelButton,
       continueButton,
@@ -269,11 +290,9 @@ Future<List> downloadDB() async {
   late List _listAlumnosInscritos = [];
   late List _listAlumnosPre = [];
   // saveDB(jsonData);
-  print('dowloading DB\n -->Dowloading list_grupos');
+  print('dowloading ');
   _listGrupos = await _getGrupos();
-  print('\n-->Downloading alumnos_inscritos');
   _listAlumnosInscritos = await _getAlumnosInscritos();
-  print('\n-->Downloading alumnos_pre');
   _listAlumnosPre = await _getAlumnosPre();
 
   await saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
@@ -364,7 +383,7 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
           curp TEXT,
           sexo TEXT,
           fecha_nacimiento TEXT,
-          domiclio TEXT,
+          domicilio TEXT,
           colonia TEXT,
           municipio TEXT,
           estado TEXT,
@@ -413,7 +432,7 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
 
     for (var item in alumnosPre) {
       await txn.rawInsert(
-          'INSERT INTO alumnos_pre_offline(id_registro, nombre, apellido_paterno, apellido_materno, correo, telefono, curp, sexo, fecha_nacimiento, domiclio, colonia, municipio, estado, estado_civil, matricula) '
+          'INSERT INTO alumnos_pre_offline(id_registro, nombre, apellido_paterno, apellido_materno, correo, telefono, curp, sexo, fecha_nacimiento, domicilio, colonia, municipio, estado, estado_civil, matricula) '
           'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
           [
             item['id'],

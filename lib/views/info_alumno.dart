@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/default_text_field.dart';
@@ -7,12 +8,12 @@ import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/generated/assets.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart'; // join()
 import '../utils/size_config.dart';
+
 
 class InfoAlumno extends StatefulWidget {
   final String curp;
@@ -26,12 +27,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   final TextEditingController _cardHolderName = TextEditingController();
   final TextEditingController _cardNumber = TextEditingController();
 
-  List paymentCardsList = [
-    Assets.cardsVisa,
-    Assets.cardsMastercard,
-    Assets.cardsPaypal,
-    // Assets.cardsSkrill
-  ];
   late Future<List> _futureDatosAlumno;
 
   Future<List> _getInfoAlumno() async {
@@ -50,7 +45,20 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   @override
   void initState() {
     super.initState();
-    _futureDatosAlumno = _getInfoAlumno();
+
+    bool connectivityExist = false;
+    checkInternetConnection().then((onValue) {
+      connectivityExist = onValue;
+    });
+
+
+    if (connectivityExist) {
+      _futureDatosAlumno = _getInfoAlumno();
+    } else {
+      _futureDatosAlumno = _getInfoAlumnoFromLocalDB(widget.curp);
+    }
+
+    
   }
 
   int selectedCard = 0;
@@ -100,15 +108,6 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
   var data = dataResponse[0];
   final TextEditingController _cardHolderName = TextEditingController();
   final TextEditingController _cardNumber = TextEditingController();
-
-  final f = new DateFormat('yyyy-MM-dd');
-
-  List paymentCardsList = [
-    Assets.cardsVisa,
-    Assets.cardsMastercard,
-    Assets.cardsPaypal,
-    // Assets.cardsSkrill
-  ];
 
   alumno.add(
     SizedBox(
@@ -326,8 +325,7 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
       children: [
         Container(
             padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
-            child: Text(
-                '¿TE PARECE BIEN LOS CURSOS A DISTANCIA?',
+            child: Text('¿TE PARECE BIEN LOS CURSOS A DISTANCIA?',
                 style: TextStyle(color: Repository.subTextColor(context)))),
         Divider(
           color: Repository.dividerColor(context),
@@ -360,7 +358,6 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
     controlAffinity: ListTileControlAffinity.leading, //  <-- leading Checkbox
   ));
 
-  
   alumno.add(elevatedButton(
     color: Repository.selectedItemColor(context),
     context: context,
@@ -380,4 +377,30 @@ Widget customColumn({required String title, required String subtitle}) {
       Text(subtitle, style: const TextStyle(fontSize: 16)),
     ],
   );
+}
+
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile ||
+      connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  } else {
+    print('no connection to internet :(');
+    return false;
+  }
+}
+
+
+Future<List> _getInfoAlumnoFromLocalDB(curp) async {
+  String dbTable = 'alumnos_pre_offline';
+  var databasesPath = await getDatabasesPath();
+
+  String path = join(databasesPath, 'syvic_offline.db');
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  List dataGrupo =
+      await database.query(dbTable, where: 'curp = ?', whereArgs: [curp]);
+      print(dataGrupo);
+  return dataGrupo;
 }

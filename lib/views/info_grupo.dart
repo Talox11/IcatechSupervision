@@ -90,7 +90,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
             if (snapshot.hasData) {
               return ListView(
                 padding: const EdgeInsets.all(15),
-                children: _showInfo(snapshot.data, size, context),
+                children: _showInfo(snapshot.data, size, context,),
               );
             } else if (snapshot.hasError) {
               print(snapshot.error);
