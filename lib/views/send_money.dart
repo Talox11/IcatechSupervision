@@ -1,11 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_banking_app/generated/assets.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/size_config.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:flutter_banking_app/widgets/people_slider.dart';
@@ -67,7 +64,7 @@ class _SendMoneyState extends State<SendMoney> {
                             width: 60, height: 45, fit: BoxFit.cover),
                         const Padding(
                           padding: EdgeInsets.only(top: 20, right: 5),
-                          child: Text('\2.00 DHS',
+                          child: Text('2.00 DHS',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 21,
@@ -145,7 +142,7 @@ class _SendMoneyState extends State<SendMoney> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('\1600.00',
+                      Text('1600.00',
                           style: TextStyle(
                               color: Repository.titleColor(context),
                               fontSize: 32,

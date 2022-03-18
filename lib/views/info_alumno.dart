@@ -1,9 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/models/salumnomodel.dart';
-import 'package:flutter_banking_app/views/info_alumno.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/default_text_field.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';

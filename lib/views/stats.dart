@@ -325,13 +325,13 @@ class _StatsState extends State<Stats> {
       lineBarsData: [
         LineChartBarData(
           spots: [
-            FlSpot(0, 3),
-            FlSpot(1.5, 3),
-            FlSpot(3.5, 5),
-            FlSpot(5, 3),
-            FlSpot(6.5, 4),
-            FlSpot(8, 2.8),
-            FlSpot(9, 3),
+            const FlSpot(0, 3),
+            const FlSpot(1.5, 3),
+            const FlSpot(3.5, 5),
+            const FlSpot(5, 3),
+            const FlSpot(6.5, 4),
+            const FlSpot(8, 2.8),
+            const FlSpot(9, 3),
           ],
           isCurved: true,
           colors: gradientColors,

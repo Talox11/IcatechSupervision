@@ -10,10 +10,6 @@ import 'package:flutter_banking_app/widgets/buttons.dart';
 
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 
-
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -25,8 +21,6 @@ class DownloadDB extends StatefulWidget {
 }
 
 class _DownloadDBState extends State<DownloadDB> {
-  late List _futureGrupo;
-  late List _listAlumnos = [];
 
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();

@@ -10,8 +10,7 @@ import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -24,8 +23,6 @@ class TestQuery extends StatefulWidget {
 }
 
 class _TestQueryState extends State<TestQuery> {
-  late List _futureGrupo;
-  late List _listAlumnos = [];
 
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
@@ -183,9 +180,9 @@ void testQuery2() async {
       version: 1, onCreate: (Database db, int version) async {});
 
   List<Map> grupos =
-      await database.rawQuery('SELECT COUNT(*) FROM tbl_grupo_offline');
+      await database.rawQuery('SELECT * FROM tbl_grupo_offline limit 2');
   List<Map> inscripcion =
-      await database.rawQuery('SELECT COUNT(*) FROM tbl_inscripcion_offline');
+      await database.rawQuery('SELECT * FROM tbl_inscripcion_offline where id_curso = 223850032 ');
   List<Map> alumnos =
       await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_offline');
 

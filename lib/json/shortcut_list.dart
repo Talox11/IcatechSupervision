@@ -20,7 +20,7 @@ List shortcutList = [
   {
     'color': const Color(0xFF2BB33A),
     'icon': IconlyBold.Wallet,
-    'route': TestQuery(),
+    'route': const TestQuery(),
   },
   {
     'color': const Color(0xFFAF52C1),

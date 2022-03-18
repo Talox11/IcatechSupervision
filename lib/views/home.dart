@@ -269,9 +269,11 @@ Future<List> downloadDB() async {
   late List _listAlumnosInscritos = [];
   late List _listAlumnosPre = [];
   // saveDB(jsonData);
-  print('dowloading DB');
+  print('dowloading DB\n -->Dowloading list_grupos');
   _listGrupos = await _getGrupos();
+  print('\n-->Downloading alumnos_inscritos');
   _listAlumnosInscritos = await _getAlumnosInscritos();
+  print('\n-->Downloading alumnos_pre');
   _listAlumnosPre = await _getAlumnosPre();
 
   await saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
@@ -345,8 +347,9 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           id_registro INTEGER,
           matricula TEXT,
-          alumno TEXT,
+          nombre TEXT,
           curp TEXT,
+          id_curso TEXT,
           createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''');
 
@@ -396,9 +399,15 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
 
     for (var item in alumnosIns) {
       await txn.rawInsert(
-          'INSERT INTO tbl_inscripcion_offline(id_registro, matricula, alumno, curp ) '
-          'VALUES(?, ?, ?, ?)',
-          [item['id'], item['matricula'], item['alumno'], item['curp']]);
+          'INSERT INTO tbl_inscripcion_offline(id_registro, matricula, nombre, curp, id_curso ) '
+          'VALUES(?, ?, ?, ?, ?)',
+          [
+            item['id'],
+            item['matricula'],
+            item['alumno'],
+            item['curp'],
+            item['id_curso']
+          ]);
     }
     print('inserted alumnos rows: ${alumnosIns.length}');
 

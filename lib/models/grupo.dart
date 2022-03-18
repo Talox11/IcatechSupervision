@@ -1,5 +1,3 @@
-import 'package:flutter_banking_app/models/alumnomodel.dart';
-
 class Grupo {
   String id = '';
   String curso = '';

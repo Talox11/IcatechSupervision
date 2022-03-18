@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter_banking_app/models/grupoJson.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 

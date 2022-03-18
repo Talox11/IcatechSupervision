@@ -1,10 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/generated/assets.dart';
-import 'package:flutter_banking_app/json/shortcut_list.dart';
 import 'package:flutter_banking_app/models/grupo.dart';
-import 'package:flutter_banking_app/models/salumnomodel.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
@@ -13,6 +12,9 @@ import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
+//local db
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class InfoGrupo extends StatefulWidget {
   final String clave;
@@ -23,8 +25,26 @@ class InfoGrupo extends StatefulWidget {
 }
 
 class _InfoGrupoState extends State<InfoGrupo> {
+  // connectivity var
+
+
   late Future<Grupo> _futureGrupo;
   late List _listAlumnos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    bool connectivityExist = false;
+    checkInternetConnection().then((onValue) {
+      connectivityExist = onValue;
+    });
+    if (connectivityExist) {
+      _futureGrupo = _getInfoGrupo();
+    } else {
+      _futureGrupo = getInfoGrupoFromLocalDB(widget.clave);
+    }
+  }
+
   Future<Grupo> _getInfoGrupo() async {
     final response = await http.post(
       Uri.parse('http://10.0.2.2:5000/curso/'),
@@ -35,13 +55,9 @@ class _InfoGrupoState extends State<InfoGrupo> {
     );
 
     if (response.statusCode == 201) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
       String body = utf8.decode(response.bodyBytes);
       final jsonData = jsonDecode(body);
-      // print(jsonData);
       _listAlumnos = await _getAlumnos(jsonData[0]['id']);
-      // print(_listAlumnos);
 
       Grupo grupo = Grupo(
           jsonData[0]['id'],
@@ -52,20 +68,11 @@ class _InfoGrupoState extends State<InfoGrupo> {
           jsonData[0]['inicio'],
           jsonData[0]['termino']);
       grupo.setAlumnos(_listAlumnos);
-      // print(grupo.alumnos);
+
       return grupo;
     } else {
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
-
       throw Exception('Failed to create album.');
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _futureGrupo = _getInfoGrupo();
   }
 
   @override
@@ -100,7 +107,6 @@ class _InfoGrupoState extends State<InfoGrupo> {
 List<Widget> _showInfo(dataResponse, size, context) {
   List<Widget> widgetInfoGeneral = [];
   Grupo infoGrupo = dataResponse;
-  List<Alumno> infoAlumno = [];
 
   widgetInfoGeneral.add(
     Container(
@@ -173,7 +179,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: size.width * 0.67,
+                  width: size.width * 0.90,
                   padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.horizontal(
@@ -203,7 +209,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
                   ),
                 ),
                 Container(
-                  width: size.width * 0.27,
+                  width: size.width * 0.10,
                   padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.horizontal(
@@ -224,9 +230,9 @@ List<Widget> _showInfo(dataResponse, size, context) {
                             color: Colors.white, size: 20),
                       ),
                       const Spacer(),
-                      const Text('Matricula', style: TextStyle(fontSize: 12)),
+                      const Text('Matricula', style: const TextStyle(fontSize: 12)),
                       const Gap(5),
-                      Text(item['matricula'], style: TextStyle(fontSize: 15)),
+                      Text(item['matricula'], style: const TextStyle(fontSize: 15)),
                     ],
                   ),
                 )
@@ -278,4 +284,55 @@ Future<List> _getAlumnos(clave) async {
   } else {
     throw Exception('Falló la conexión');
   }
+}
+
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile ||
+      connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  } else {
+    print('no connection to internet :(');
+    return false;
+  }
+}
+
+Future<Grupo> getInfoGrupoFromLocalDB(clave) async {
+
+  late List _listAlumnos = [];
+  String dbTable = 'tbl_grupo_offline';
+
+  var databasesPath = await getDatabasesPath();
+
+  String path = join(databasesPath, 'syvic_offline.db');
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  List dataGrupo =
+      await database.query(dbTable, where: 'clave = ?', whereArgs: [clave]);
+
+  _listAlumnos =
+      await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
+
+  print(dataGrupo[0]['id_registro'].runtimeType);
+  print(_listAlumnos);
+  Grupo grupo = Grupo(
+      dataGrupo[0]['id_registro'].toString(),
+      dataGrupo[0]['curso'],
+      dataGrupo[0]['cct'],
+      dataGrupo[0]['unidad'],
+      dataGrupo[0]['clave'],
+      dataGrupo[0]['inicio'],
+      dataGrupo[0]['termino']);
+
+  grupo.setAlumnos(_listAlumnos);
+  return grupo;
+}
+
+Future<List> _getAlumnosFromLocalDB(idCurso, database) async {
+  String dbTable = 'tbl_inscripcion_offline';
+  List dataAlumnos = await database
+      .query(dbTable, where: 'id_curso = ?', whereArgs: [idCurso]);
+
+  return dataAlumnos;
 }
