@@ -10,6 +10,7 @@ import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/views/info_alumno.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
+import 'package:flutter_banking_app/widgets/separator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
 //local db
@@ -26,7 +27,6 @@ class InfoGrupo extends StatefulWidget {
 
 class _InfoGrupoState extends State<InfoGrupo> {
   // connectivity var
-
 
   late Future<Grupo> _futureGrupo;
   late List _listAlumnos = [];
@@ -90,7 +90,11 @@ class _InfoGrupoState extends State<InfoGrupo> {
             if (snapshot.hasData) {
               return ListView(
                 padding: const EdgeInsets.all(15),
-                children: _showInfo(snapshot.data, size, context,),
+                children: _showInfo(
+                  snapshot.data,
+                  size,
+                  context,
+                ),
               );
             } else if (snapshot.hasError) {
               print(snapshot.error);
@@ -142,22 +146,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
   );
 
   widgetInfoGeneral.add(
-    Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-            padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
-            child: Text('Alumnos inscritos a este grupo',
-                style: TextStyle(
-                    color: Repository.subTextColor(context), fontSize: 30))),
-        Divider(
-          color: Repository.dividerColor(context),
-          thickness: 2,
-        ),
-        Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 30)),
-      ],
-    ),
+    separatorText(context: context, text: 'Alumnos inscritos a este grupo')
   );
   // print(infoGrupo.alumnos);
   var data = infoGrupo.alumnos;
@@ -184,13 +173,27 @@ List<Widget> _showInfo(dataResponse, size, context) {
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.horizontal(
                         left: Radius.circular(15)),
-                    color: Styles.greenColor,
+                    color: Styles.icatechGoldColor,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ),
+                Container(
+                  width: size.width * 0.95,
+                  padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.horizontal(
+                        right: Radius.circular(15)),
+                    color: Styles.icatechPurpleColor,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Image.asset(Assets.cardsVisaYellow,
-                      //     width: 60, height: 50, fit: BoxFit.cover),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.only(top: 10),
+                      ),
                       Text(item['nombre'],
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
@@ -200,39 +203,11 @@ List<Widget> _showInfo(dataResponse, size, context) {
                       Text('CURP',
                           style: TextStyle(
                               color: Colors.white.withOpacity(0.5),
-                              fontSize: 12)),
+                              fontSize: 15)),
                       const Gap(5),
                       Text(item['curp'],
                           style: const TextStyle(
-                              color: Colors.white, fontSize: 15)),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: size.width * 0.95,
-                  padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.horizontal(
-                        right: Radius.circular(15)),
-                    color: Styles.yellowColor,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.only(top: 10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Styles.greenColor,
-                        ),
-                        child: const Icon(Icons.swipe_rounded,
-                            color: Colors.white, size: 20),
-                      ),
-                      const Spacer(),
-                      const Text('Matricula', style: const TextStyle(fontSize: 12)),
-                      const Gap(5),
-                      Text(item['matricula'], style: const TextStyle(fontSize: 15)),
+                              color: Colors.white, fontSize: 19)),
                     ],
                   ),
                 )
@@ -298,7 +273,6 @@ Future<bool> checkInternetConnection() async {
 }
 
 Future<Grupo> getInfoGrupoFromLocalDB(clave) async {
-
   late List _listAlumnos = [];
   String dbTable = 'tbl_grupo_offline';
 

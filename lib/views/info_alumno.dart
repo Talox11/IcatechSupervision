@@ -24,8 +24,12 @@ class InfoAlumno extends StatefulWidget {
 }
 
 class _InfoAlumnoState extends State<InfoAlumno> {
-  final TextEditingController _cardHolderName = TextEditingController();
-  final TextEditingController _cardNumber = TextEditingController();
+  final TextEditingController _entidadNacimiento = TextEditingController();
+  final TextEditingController _seccionVota = TextEditingController();
+  final TextEditingController _calle = TextEditingController();
+  final TextEditingController _numExt = TextEditingController();
+  final TextEditingController _numInt = TextEditingController();
+  final TextEditingController _none = TextEditingController();
 
   late Future<List> _futureDatosAlumno;
 
@@ -106,8 +110,12 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
   print(dataResponse);
   List<Widget> alumno = [];
   var data = dataResponse[0];
-  final TextEditingController _cardHolderName = TextEditingController();
-  final TextEditingController _cardNumber = TextEditingController();
+  final TextEditingController _entidadNacimiento = TextEditingController();
+  final TextEditingController _seccionVota = TextEditingController();
+  final TextEditingController _calle = TextEditingController();
+  final TextEditingController _numExt = TextEditingController();
+  final TextEditingController _numInt = TextEditingController();
+  final TextEditingController _none = TextEditingController();
 
   alumno.add(
     SizedBox(
@@ -122,7 +130,7 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
             decoration: BoxDecoration(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(15)),
-              color: Styles.greenColor,
+              color: Styles.icatechGoldColor,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,7 +151,7 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
             decoration: BoxDecoration(
               borderRadius:
                   const BorderRadius.vertical(bottom: Radius.circular(15)),
-              color: Styles.yellowColor,
+              color: Styles.icatechPurpleColor,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,27 +180,30 @@ List<Widget> _showInfo(dataResponse, cardSize, context, state) {
 
   alumno.add(const Gap(30));
   alumno.add(
-    DefaultTextField(controller: _cardHolderName, title: data['domicilio']),
+    
+    DefaultTextField(controller: _none, title:'Domicilio', label: data['domicilio'], enabled:false),
   );
 
   alumno.add(DefaultTextField(
-      controller: _cardNumber, title: 'Estado', label: data['estado']));
+      controller: _none, title: 'Estado', label: data['estado'], enabled:false));
   alumno.add(
     Row(
       children: [
         Flexible(
           child: DefaultTextField(
-              controller: _cardNumber,
+              controller: _none,
               title: 'Correo',
-              label: data['correo'] ?? 'Sin correo electronico'),
+              label: data['correo'] ?? 'Sin correo electronico',
+              enabled: false),
         ),
         const Gap(10),
         Flexible(
           child: DefaultTextField(
-              controller: _cardNumber,
+              controller: _none,
               title: 'Telefono',
               label: data['telefono'] ?? 'Sin numero telefono',
-              obscure: true),
+              obscure: true,
+              enabled: false),
         ),
       ],
     ),
@@ -372,9 +383,9 @@ Widget customColumn({required String title, required String subtitle}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(title.toUpperCase(), style: const TextStyle(fontSize: 12)),
+      Text(title.toUpperCase(), style: const TextStyle(fontSize: 14, color: Colors.white)  ),
       const Gap(4),
-      Text(subtitle, style: const TextStyle(fontSize: 16)),
+      Text(subtitle, style: const TextStyle(fontSize: 18, color: Colors.white)),
     ],
   );
 }

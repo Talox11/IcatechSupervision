@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/input_decoration.dart';
 import 'package:flutter_banking_app/utils/size_config.dart';
+import 'package:flutter_banking_app/utils/styles.dart';
 
 import 'package:gap/gap.dart';
 
@@ -48,19 +49,19 @@ class DefaultTextField extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(_title, style: TextStyle(color: Colors.white.withOpacity(0.7), fontWeight: FontWeight.w500, fontSize: 15),),
+        Text(_title, style: TextStyle(color: Styles.icatechPurpleColor.withOpacity(0.7), fontWeight: FontWeight.w500, fontSize: 15),),
         Gap(getProportionateScreenHeight(5)),
         TextFormField(
           obscureText: obscure??false,
           enabled: enabled,
           focusNode: focusNode,
           keyboardType: keyboardType,
-          cursorColor: Colors.white.withOpacity(0.5),
+          cursorColor: Styles.icatechGrayColor.withOpacity(0.5),
           textInputAction: textInputAction ?? TextInputAction.next,
           onFieldSubmitted: onFieldSubmitted,
           validator: (value) {
             if (value!.isEmpty) {
-              return 'Ce champs est obligatoire';
+              return 'Este campo es obligatorio';
             }
 
             return validator?.call(value);

@@ -22,8 +22,8 @@ class _BottomNavState extends State<BottomNav> {
   static final List<Widget> _widgetOptions = <Widget>[
     const Home(),
     const Wallet(),
-    const TestQuery(),
-    const Profile(),
+    // const TestQuery(),
+    // const Profile(),
   ];
 
   void _onItemTapped(int index) {
@@ -44,7 +44,7 @@ class _BottomNavState extends State<BottomNav> {
         showUnselectedLabels: false,
         selectedLabelStyle: TextStyle(fontSize: 20, color: Styles.primaryColor),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Repository.selectedItemColor(context),
+        selectedItemColor: Styles.icatechGoldColor,
         unselectedItemColor: Colors.grey.withOpacity(0.7),
         items: const [
           BottomNavigationBarItem(
@@ -54,14 +54,6 @@ class _BottomNavState extends State<BottomNav> {
           BottomNavigationBarItem(
             icon: Icon(IconlyBold.Document),
             label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Chart),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Profile),
-            label: 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,

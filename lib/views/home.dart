@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_banking_app/json/transactions.dart';
@@ -8,7 +9,8 @@ import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/size_config.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/views/loadingIndicator.dart';
+
+import 'package:flutter_banking_app/widgets/loadingIndicator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
@@ -48,7 +50,7 @@ class _HomeState extends State<Home> {
           Container(
             width: double.infinity,
             height: size.height * .25,
-            color: Repository.headerColor(context),
+            color: Styles.icatechPurpleColor,
           ), //header
           ListView(
             physics: const BouncingScrollPhysics(),
@@ -203,10 +205,19 @@ class _HomeState extends State<Home> {
     Widget continueButton = TextButton(
       child: const Text('Continuar'),
       onPressed: () async {
-        DialogBuilder(context).showLoadingIndicator();
-        await downloadDB();
-        Navigator.pop(context);        
-        DialogBuilder(context).hideOpenDialog();
+        bool connectivityExist = false;
+        await checkInternetConnection().then((onValue) {
+          connectivityExist = onValue;
+          print('On connectivityExist =  $connectivityExist');
+        });
+
+        if (connectivityExist) {
+          print('downloading');
+          DialogBuilder(context).showLoadingIndicator();
+          await downloadDB();
+          Navigator.pop(context);
+          DialogBuilder(context).hideOpenDialog();
+        } else {}
       },
     );
 
@@ -232,7 +243,6 @@ class _HomeState extends State<Home> {
   }
 
   showCircularProgress() {
-
     Column column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -458,4 +468,14 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
   return [
     {'done'}
   ];
+}
+
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile ||
+      connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  } else {
+    return false;
+  }
 }
