@@ -1,5 +1,3 @@
-import 'package:flutter_banking_app/models/alumnomodel.dart';
-
 class Grupo {
   String id = '';
   String curso = '';
@@ -15,4 +13,20 @@ class Grupo {
   setAlumnos(alumnos) {
     this.alumnos = alumnos;
   }
+
+  // Map toJson() => {
+  //     'id_registro':id,
+  //     'curso':curso,
+  //     'cct':cct,
+  //     'unidad':unidad,
+  //     'clave':clave,
+  //     'mod':mod,
+  //     'inicio':inicio,
+  //     'termino':termino,
+  //     'area':area,
+  //     'espe':espe,
+  //     'tcapacitacion':tcapacitacion,
+  //     'depen':depen,
+  //     'tipoCurso':tipoCurso,
+  //   };
 }

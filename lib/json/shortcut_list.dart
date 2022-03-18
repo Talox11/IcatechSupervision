@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
-import 'package:flutter_banking_app/views/alumno_detail.dart';
+
+import 'package:flutter_banking_app/views/donwload_db.dart';
 import 'package:flutter_banking_app/views/send_money.dart';
 import 'package:flutter_banking_app/views/add_card.dart';
+import 'package:flutter_banking_app/views/test_query.dart';
 
 List shortcutList = [
   {
     'color': const Color(0xFF026EF4),
     'icon': IconlyBold.Download,
+    'route': const DownloadDB(),
   },
   {
     'color': const Color(0xFFFB6A4B),
@@ -17,7 +20,7 @@ List shortcutList = [
   {
     'color': const Color(0xFF2BB33A),
     'icon': IconlyBold.Wallet,
-    'route': AlumnoDetail(),
+    'route': const TestQuery(),
   },
   {
     'color': const Color(0xFFAF52C1),

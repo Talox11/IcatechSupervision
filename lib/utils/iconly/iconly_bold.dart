@@ -5,6 +5,8 @@
 //    - family: Iconly---Bold
 //      fonts:
 //       - asset: fonts/Iconly---Bold.ttf
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/widgets.dart';
 
 class IconlyBold {

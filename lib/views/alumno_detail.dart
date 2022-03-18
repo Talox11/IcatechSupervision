@@ -1,9 +1,6 @@
-import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/models/salumnomodel.dart';
-import 'package:flutter_banking_app/views/info_alumno.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/default_text_field.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
@@ -12,11 +9,11 @@ import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/generated/assets.dart';
 import 'package:gap/gap.dart';
-import 'package:http/http.dart' as http;
-
 import '../utils/size_config.dart';
 
 class AlumnoDetail extends StatefulWidget {
+  const AlumnoDetail({Key? key}) : super(key: key);
+
   @override
   _AlumnoDetailState createState() => _AlumnoDetailState();
 }
@@ -30,43 +27,11 @@ class _AlumnoDetailState extends State<AlumnoDetail> {
     Assets.cardsPaypal,
     // Assets.cardsSkrill
   ];
-  late Future<List<Alumno>> _listadoAlumno;
 
-  Future<List<Alumno>> _getAlumnos() async {
-    final response =
-        await http.get(Uri.parse('http://10.0.2.2:5000/curso/223850032'));
-
-    List<Alumno> alumnos = [];
-
-    if (response.statusCode == 200) {
-      String body = utf8.decode(response.bodyBytes);
-      final jsonData = jsonDecode(body);
-      for (var item in jsonData['rows']) {
-        alumnos.add(Alumno(
-          item['nombre'],
-          item['curp'],
-          item['matricula'],
-          item['id '],
-          item['apellidoPaterno '],
-          item['apellidoMaterno '],
-          item['correo '],
-          item['telefono '],
-          item['sexo '],
-          item['fechaNacimiento '],
-          item['domicilio '],
-          item['colonia '],
-          item['estado ']));
-      }
-      return alumnos;
-    } else {
-      throw Exception('Falló la conexión');
-    }
-  }
-
+ 
   @override
   void initState() {
     super.initState();
-    _listadoAlumno = _getAlumnos();
   }
 
   int selectedCard = 0;
@@ -236,93 +201,4 @@ class _AlumnoDetailState extends State<AlumnoDetail> {
       ],
     );
   }
-}
-
-List<Widget> _showInfo(dataResponse, size, context) {
-  List<Widget> alumnos = [];
-  List<Alumno> data = dataResponse;
-
-  for (var item in data) {
-    alumnos.add(
-      InkWell(
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => InfoAlumno(curp: item.curp),
-              ));
-        },
-        child: FittedBox(
-          child: SizedBox(
-            height: size.height * 0.23,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: size.width * 0.67,
-                  padding: const EdgeInsets.fromLTRB(16, 10, 0, 20),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.horizontal(
-                        left: Radius.circular(15)),
-                    color: Styles.greenColor,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Image.asset(Assets.cardsVisaYellow,
-                      //     width: 60, height: 50, fit: BoxFit.cover),
-                      Text(item.nombre,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 32,
-                              color: Colors.white)),
-                      const Gap(20),
-                      Text('CURP',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 12)),
-                      const Gap(5),
-                      Text(item.curp,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 15)),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: size.width * 0.27,
-                  padding: const EdgeInsets.fromLTRB(20, 10, 0, 20),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.horizontal(
-                        right: Radius.circular(15)),
-                    color: Styles.yellowColor,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.only(top: 10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Styles.greenColor,
-                        ),
-                        child: const Icon(Icons.swipe_rounded,
-                            color: Colors.white, size: 20),
-                      ),
-                      const Spacer(),
-                      const Text('Matricula', style: TextStyle(fontSize: 12)),
-                      const Gap(5),
-                      Text(item.matricula, style: TextStyle(fontSize: 15)),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  return alumnos;
 }

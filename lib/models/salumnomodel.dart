@@ -15,21 +15,8 @@ class Alumno {
   String estado = '';
 
   // Alumno({required this.nombre, required this.curp, required this.matricula});
-  Alumno(nombre, curp, matricula, this.id, apellidoPaterno, apellidoMaterno, correo,
-      telefono, sexo, fechaNacimiento, domicilio, colonia, estado) {
-    this.nombre = nombre;
-    this.curp = curp;
-    this.matricula = matricula;
-    this.apellidoPaterno = apellidoPaterno;
-    this.apellidoMaterno = apellidoMaterno;
-    this.correo = correo;
-    this.telefono = telefono;
-    this.sexo = sexo;
-    this.fechaNacimiento = fechaNacimiento;
-    this.domicilio = domicilio;
-    this.colonia = colonia;
-    this.estado = estado;
-  }
+  Alumno(this.nombre, this.curp, this.matricula, this.id, this.apellidoPaterno, this.apellidoMaterno, this.correo,
+      this.telefono, this.sexo, this.fechaNacimiento, this.domicilio, this.colonia, this.estado);
 
   setAlumnoDetail(id, apellidoPaterno, apellidoMaterno, correo, telefono, sexo,
       fechaNacimiento, domicilio, colonia, estado) {
