@@ -10,8 +10,6 @@ import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
-
-
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -23,7 +21,6 @@ class TestQuery extends StatefulWidget {
 }
 
 class _TestQueryState extends State<TestQuery> {
-
   ConnectivityResult _connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
@@ -46,7 +43,7 @@ class _TestQueryState extends State<TestQuery> {
       result = await _connectivity.checkConnectivity();
     } on PlatformException catch (e) {
       print('Couldn\'t check connectivity status $e');
-      return ;
+      return;
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -173,18 +170,28 @@ void testQuery() async {
 void testQuery2() async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
-
-// open the database
+  // await deleteDatabase(path);
 
   Database database = await openDatabase(path,
       version: 1, onCreate: (Database db, int version) async {});
 
+  (await database.query('sqlite_master', columns: ['type', 'name']))
+      .forEach((row) {
+    print(row.values);
+  });
   List<Map> grupos =
-      await database.rawQuery('SELECT * FROM tbl_grupo_offline limit 2');
+      await database.rawQuery('SELECT COUNT (*) FROM tbl_grupo_offline ');
   List<Map> inscripcion =
-      await database.rawQuery('SELECT * FROM tbl_inscripcion_offline where id_curso = 223850032 ');
+      await database.rawQuery('SELECT COUNT (*) FROM tbl_inscripcion_offline ');
   List<Map> alumnos =
       await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_offline');
+
+  List<Map> grupos_temp =
+      await database.rawQuery('SELECT * FROM tbl_grupo_temp');
+  List<Map> inscripcion_temp =
+      await database.rawQuery('SELECT * FROM tbl_inscripcion_temp');
+  List<Map> alumnos_temp =
+      await database.rawQuery('SELECT * FROM alumnos_pre_temp');
 
   print('============== grupos');
   for (var item in grupos) {
@@ -196,6 +203,19 @@ void testQuery2() async {
   }
   print('============== alumnos');
   for (var item in alumnos) {
+    print(item);
+  }
+
+  print('============== grupos_temp');
+  for (var item in grupos_temp) {
+    print(item);
+  }
+  print('============== inscripcion_temp');
+  for (var item in inscripcion_temp) {
+    print(item);
+  }
+  print('============== alumnos_temp');
+  for (var item in alumnos_temp) {
     print(item);
   }
 }

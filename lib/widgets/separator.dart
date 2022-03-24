@@ -16,7 +16,7 @@ Widget separatorText(
         color: Repository.dividerColor(context),
         thickness: 2,
       ),
-      Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 30)),
+      Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 10)),
     ],
   );
 }

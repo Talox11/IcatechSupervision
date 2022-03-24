@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_banking_app/models/alumno.dart';
 import 'package:flutter_banking_app/models/grupo.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/views/info_alumno.dart';
+
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:flutter_banking_app/widgets/separator.dart';
@@ -17,6 +19,8 @@ import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'info_alumno.dart';
+
 class InfoGrupo extends StatefulWidget {
   final String clave;
   const InfoGrupo({Key? key, required this.clave}) : super(key: key);
@@ -25,54 +29,61 @@ class InfoGrupo extends StatefulWidget {
   State<InfoGrupo> createState() => _InfoGrupoState();
 }
 
+Future<Grupo> _getInfoGrupo(clave) async {
+  List _listAlumnos = [];
+  final response = await http.post(
+    Uri.parse('http://10.0.2.2:5000/curso/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'clave': clave}),
+  );
+
+  if (response.statusCode == 201) {
+    String body = utf8.decode(response.bodyBytes);
+    final jsonData = jsonDecode(body);
+    _listAlumnos = await _getAlumnos(jsonData[0]['id']);
+    print(jsonData);
+    Grupo grupo = Grupo(
+        jsonData[0]['id'],
+        jsonData[0]['curso'],
+        jsonData[0]['cct'],
+        jsonData[0]['unidad'],
+        jsonData[0]['clave'],
+        jsonData[0]['mod'],
+        jsonData[0]['inicio'],
+        jsonData[0]['termino'],
+        jsonData[0]['area'],
+        jsonData[0]['espe'],
+        jsonData[0]['tcapacitacion'],
+        jsonData[0]['depen'],
+        jsonData[0]['tipo_curso']);
+
+    grupo.setAlumnos(_listAlumnos);
+    saveTemporaly(grupo);
+    return grupo;
+  } else {
+    throw Exception('Failed to create album.');
+  }
+}
+
 class _InfoGrupoState extends State<InfoGrupo> {
   // connectivity var
 
-  late Future<Grupo> _futureGrupo;
-  late List _listAlumnos = [];
+  Future<Grupo>? _futureGrupo;
 
   @override
   void initState() {
-    super.initState();
     bool connectivityExist = false;
     checkInternetConnection().then((onValue) {
       connectivityExist = onValue;
+      if (connectivityExist) {
+        _futureGrupo = _getInfoGrupo(widget.clave);
+      } else {
+        _futureGrupo = getInfoGrupoFromLocalDB(widget.clave);
+      }
     });
-    if (connectivityExist) {
-      _futureGrupo = _getInfoGrupo();
-    } else {
-      _futureGrupo = getInfoGrupoFromLocalDB(widget.clave);
-    }
-  }
-
-  Future<Grupo> _getInfoGrupo() async {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:5000/curso/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{'clave': widget.clave}),
-    );
-
-    if (response.statusCode == 201) {
-      String body = utf8.decode(response.bodyBytes);
-      final jsonData = jsonDecode(body);
-      _listAlumnos = await _getAlumnos(jsonData[0]['id']);
-
-      Grupo grupo = Grupo(
-          jsonData[0]['id'],
-          jsonData[0]['curso'],
-          jsonData[0]['cct'],
-          jsonData[0]['unidad'],
-          jsonData[0]['clave'],
-          jsonData[0]['inicio'],
-          jsonData[0]['termino']);
-      grupo.setAlumnos(_listAlumnos);
-
-      return grupo;
-    } else {
-      throw Exception('Failed to create album.');
-    }
+    super.initState();
   }
 
   @override
@@ -82,7 +93,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
       backgroundColor: Repository.bgColor(context),
       appBar: myAppBar(
           title: 'Informacion general del grupo',
-          implyLeading: false,
+          implyLeading: true,
           context: context),
       body: FutureBuilder(
           future: _futureGrupo,
@@ -146,11 +157,10 @@ List<Widget> _showInfo(dataResponse, size, context) {
   );
 
   widgetInfoGeneral.add(
-    separatorText(context: context, text: 'Alumnos inscritos a este grupo')
-  );
+      separatorText(context: context, text: 'Alumnos inscritos a este grupo'));
   // print(infoGrupo.alumnos);
-  var data = infoGrupo.alumnos;
-  for (var item in data) {
+  List<Alumno> alumnos = infoGrupo.alumnos;
+  for (Alumno alumno in alumnos) {
     // print(item);
     widgetInfoGeneral.add(
       InkWell(
@@ -158,8 +168,10 @@ List<Widget> _showInfo(dataResponse, size, context) {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => InfoAlumno(curp: item['curp']),
+                builder: (context) => InfoAlumno(alumno: alumno),
               ));
+
+          saveTemporaly(infoGrupo);
         },
         child: FittedBox(
           child: SizedBox(
@@ -194,7 +206,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
                         padding: const EdgeInsets.all(10),
                         margin: const EdgeInsets.only(top: 10),
                       ),
-                      Text(item['nombre'],
+                      Text(alumno.nombre,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 32,
@@ -205,7 +217,7 @@ List<Widget> _showInfo(dataResponse, size, context) {
                               color: Colors.white.withOpacity(0.5),
                               fontSize: 15)),
                       const Gap(5),
-                      Text(item['curp'],
+                      Text(alumno.curp,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 19)),
                     ],
@@ -225,11 +237,18 @@ List<Widget> _showInfo(dataResponse, size, context) {
     color: Repository.selectedItemColor(context),
     context: context,
     callback: () {
-      print('subir datos ');
+      checkInternetConnection().then((onValue) {
+        if (onValue) {
+          print('subir datos ' + infoGrupo.id);
+        } else {
+          // addAuditoriaQueue(infoGrupo.id);
+          print('guardar en cola');
+        }
+      });
     },
     text: 'Finalizar',
   ));
-  print('done');
+
   return widgetInfoGeneral;
 }
 
@@ -261,10 +280,11 @@ Future<List> _getAlumnos(clave) async {
   }
 }
 
-Future<bool> checkInternetConnection() async {
+checkInternetConnection() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.mobile ||
-      connectivityResult == ConnectivityResult.wifi) {
+  if (connectivityResult == ConnectivityResult.mobile) {
+    return true;
+  } else if (connectivityResult == ConnectivityResult.wifi) {
     return true;
   } else {
     print('no connection to internet');
@@ -293,8 +313,14 @@ Future<Grupo> getInfoGrupoFromLocalDB(clave) async {
       dataGrupo[0]['cct'],
       dataGrupo[0]['unidad'],
       dataGrupo[0]['clave'],
+      dataGrupo[0]['mod'],
       dataGrupo[0]['inicio'],
-      dataGrupo[0]['termino']);
+      dataGrupo[0]['termino'],
+      dataGrupo[0]['area'],
+      dataGrupo[0]['espec'],
+      dataGrupo[0]['tcapacitacion'],
+      dataGrupo[0]['depen'],
+      dataGrupo[0]['tipo_curso']);
 
   grupo.setAlumnos(_listAlumnos);
   return grupo;
@@ -306,4 +332,83 @@ Future<List> _getAlumnosFromLocalDB(idCurso, database) async {
       .query(dbTable, where: 'id_curso = ?', whereArgs: [idCurso]);
 
   return dataAlumnos;
+}
+
+Future saveTemporaly(grupo) async {
+  
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  await database.transaction((txn) async {
+    ifTempRecordExist(database, 'tbl_grupo_temp', grupo.id).then((exist) {
+      if (!exist) {
+        print('new grupo record');
+        List alumnos = grupo.alumnos;
+
+        txn.rawInsert(
+            'INSERT INTO tbl_grupo_temp(id_registro, curso, cct, unidad, clave, mod, inicio, termino, area, espe, tcapacitacion, depen, tipo_curso) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [
+              grupo.id,
+              grupo.curso,
+              grupo.cct,
+              grupo.unidad,
+              grupo.clave,
+              grupo.mod,
+              grupo.inicio,
+              grupo.termino,
+              grupo.area,
+              grupo.espe,
+              grupo.tcapacitacion,
+              grupo.depen,
+              grupo.tipoCurso
+            ]);
+        for (var a in alumnos) {
+          
+          txn.rawInsert(
+              'INSERT INTO alumnos_pre_temp(id_registro, id_curso, nombre, apellido_paterno, apellido_materno, correo, telefono, curp, sexo, '
+              'fecha_nacimiento, domicilio, colonia, municipio, estado, estado_civil, matricula, seccion_vota, numExt, numInt, resp_satisfaccion, com_satisfaccion) '
+              ' VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+              [
+                a['id'],
+                a['idCurso'],
+                a['nombre'],
+                a['apellidoPaterno'],
+                a['apellidoMaterno'],
+                a['correo'],
+                a['telefono'],
+                a['curp'],
+                a['sexo'],
+                a['fechaNacimiento'],
+                a['domicilio'],
+                a['colonia'],
+                a['municipio'],
+                a['estado'],
+                a['estadoCivil'],
+                a['matricula'],
+                '', //seccionVota
+                '', //numExt
+                '', //numInt
+                '', //resp_satisfaccion
+                '', //com_satisfaccion
+              ]);
+        }
+      } else {
+        print('no');
+      }
+    });
+  });
+}
+
+Future<bool> ifTempRecordExist(database, dbTable, idRegistro) async {
+  List row = await database
+      .query(dbTable, where: 'id_registro = ?', whereArgs: [idRegistro]);
+  if (row.isEmpty) {
+    return false;
+  } else {
+    return true;
+  }
 }

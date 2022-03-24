@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => ViewModel())
       ],
       child: MaterialApp(
-        title: 'Flutter Banking App',
+        title: 'Icatech Verificadores',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           fontFamily: 'DMSans',

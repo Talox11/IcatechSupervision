@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool visible = true;
+
+  @override
+  void initState() {
+    createTables();
+    super.initState();
+  }
 
   loadProgress() {
     if (visible == true) {
@@ -306,7 +313,6 @@ Future<List> downloadDB() async {
   _listAlumnosPre = await _getAlumnosPre();
 
   await saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
-  print('done');
   return [
     {'done'}
   ];
@@ -401,7 +407,62 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
           matricula TEXT,
           createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          curso TEXT,
+          cct TEXT,
+          unidad TEXT,
+          clave TEXT,
+          mod TEXT,
+          inicio DATE,
+          termino DATE,
+          area TEXT,
+          espe TEXT,
+          tcapacitacion TEXT,
+          depen TEXT,
+          tipo_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          matricula TEXT,
+          nombre TEXT,
+          curp TEXT,
+          id_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          id_curso INTEGER,
+          nombre TEXT,
+          apellido_paterno TEXT,
+          apellido_materno TEXT,
+          correo TEXT,
+          telefono TEXT,
+          curp TEXT,
+          sexo TEXT,
+          fecha_nacimiento TEXT,
+          domicilio TEXT,
+          colonia TEXT,
+          municipio TEXT,
+          estado TEXT,
+          estado_civil TEXT,
+          matricula TEXT,
+          seccion_vota TEXT,
+          numExt TEXT,
+          numInt TEXT,
+          resp_satisfaccion TEXT,
+          com_satisfaccion TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
   });
+  
 
   await database.transaction((txn) async {
     for (var item in grupos) {
@@ -470,6 +531,122 @@ Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
   ];
 }
 
+Future createTables() async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+  await deleteDatabase(path);
+
+  Database database = await openDatabase(path, version: 1,
+      onCreate: (Database db, int version) async {
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_offline (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          curso TEXT,
+          cct TEXT,
+          unidad TEXT,
+          clave TEXT,
+          mod TEXT,
+          inicio DATE,
+          termino DATE,
+          area TEXT,
+          espe TEXT,
+          tcapacitacion TEXT,
+          depen TEXT,
+          tipo_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_offline(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          matricula TEXT,
+          nombre TEXT,
+          curp TEXT,
+          id_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_offline(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          nombre TEXT,
+          apellido_paterno TEXT,
+          apellido_materno TEXT,
+          correo TEXT,
+          telefono TEXT,
+          curp TEXT,
+          sexo TEXT,
+          fecha_nacimiento TEXT,
+          domicilio TEXT,
+          colonia TEXT,
+          municipio TEXT,
+          estado TEXT,
+          estado_civil TEXT,
+          matricula TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          curso TEXT,
+          cct TEXT,
+          unidad TEXT,
+          clave TEXT,
+          mod TEXT,
+          inicio DATE,
+          termino DATE,
+          area TEXT,
+          espe TEXT,
+          tcapacitacion TEXT,
+          depen TEXT,
+          tipo_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          matricula TEXT,
+          nombre TEXT,
+          curp TEXT,
+          id_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          id_curso INTEGER,
+          nombre TEXT,
+          apellido_paterno TEXT,
+          apellido_materno TEXT,
+          correo TEXT,
+          telefono TEXT,
+          curp TEXT,
+          sexo TEXT,
+          fecha_nacimiento TEXT,
+          domicilio TEXT,
+          colonia TEXT,
+          municipio TEXT,
+          estado TEXT,
+          estado_civil TEXT,
+          matricula TEXT,
+          seccion_vota TEXT,
+          numExt TEXT,
+          numInt TEXT,
+          resp_satisfaccion TEXT,
+          com_satisfaccion TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+  });
+
+  for (var row
+      in (await database.query('sqlite_master', columns: ['type', 'name']))) {
+    print(row.values);
+  }
+}
+
 Future<bool> checkInternetConnection() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult == ConnectivityResult.mobile ||
@@ -477,5 +654,16 @@ Future<bool> checkInternetConnection() async {
     return true;
   } else {
     return false;
+  }
+}
+
+Future<bool> verifyIfTableExist(db, tableName) async {
+  List row = await db
+      .query('sqlite_master', where: 'name = ?', whereArgs: [tableName]);
+  print(row);
+  if (row.isEmpty) {
+    return false;
+  } else {
+    return true;
   }
 }
