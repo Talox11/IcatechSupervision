@@ -3,8 +3,8 @@ import 'dart:developer';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_banking_app/models/db_helper.dart';
 
-import 'package:flutter_banking_app/json/transactions.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
@@ -14,8 +14,9 @@ import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/widgets/loadingIndicator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
+import 'package:postgres/postgres.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart'; // join()
+import 'package:path/path.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -25,11 +26,14 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  Future<List>? _futureGrupo;
   bool visible = true;
 
   @override
   void initState() {
     createTables();
+    _futureGrupo = getQueueUpload();
+
     super.initState();
   }
 
@@ -43,6 +47,21 @@ class _HomeState extends State<Home> {
         visible = true;
       });
     }
+  }
+
+  Future<List> getQueueUpload() async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'syvic_offline.db');
+
+    Database database = await openDatabase(path,
+        version: 1, onCreate: (Database db, int version) async {});
+
+    List row = await database
+        .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
+    // for (var item in row){
+    //   print(item);
+    // }
+    return Future.value(row);
   }
 
   @override
@@ -60,145 +79,175 @@ class _HomeState extends State<Home> {
             color: Styles.icatechPurpleColor,
           ), //header
           ListView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            children: [
-              Gap(getProportionateScreenHeight(100)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Hola verificador',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 16)),
-                      const Gap(3),
-                      const Text('Bienvenido de vuelta',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold))
-                    ],
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              children: [
+                Gap(getProportionateScreenHeight(100)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Hola verificador',
+                            style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 16)),
+                        const Gap(3),
+                        const Text('Bienvenido de vuelta',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold))
+                      ],
+                    ),
+                  ],
+                ),
+                const Gap(25),
+                const Gap(15),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Repository.accentColor(context),
                   ),
-                ],
-              ),
-              const Gap(25),
-              const Gap(15),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Repository.accentColor(context),
-                ),
-                child: Row(
-                    //iconos tab
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          // call this method
-                          showDownloadDBDialog(context);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF026EF4).withOpacity(0.15),
+                  child: Row(
+                      //iconos tab
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            // call this method
+                            checkInternetConnection().then((connected) {
+                              if (connected) {
+                                showDownloadDBDialog(context);
+                              } else {
+                                showNoInternetConn(context);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF026EF4).withOpacity(0.15),
+                            ),
+                            child: const Icon(IconlyBold.Download,
+                                color: Color(0xFF026EF4)),
                           ),
-                          child: const Icon(IconlyBold.Download,
-                              color: Color(0xFF026EF4)),
                         ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          // call this method
-                          showSyncDialog(context);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFB6A4B).withOpacity(0.15),
+                        InkWell(
+                          onTap: () {
+                            // call this method
+                            showSyncDialog(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFFB6A4B).withOpacity(0.15),
+                            ),
+                            child: const Icon(IconlyBold.Upload,
+                                color: Color(0xFFFB6A4B)),
                           ),
-                          child: const Icon(IconlyBold.Upload,
-                              color: Color(0xFFFB6A4B)),
-                        ),
-                      )
-                    ]),
-              ),
-              const Gap(20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Pendientes por subir',
-                      style: TextStyle(
-                          color: Repository.textColor(context),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
-              MediaQuery.removePadding(
-                removeTop: true,
-                context: context,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: transactions.length,
-                  itemBuilder: (c, i) {
-                    final trs = transactions[i];
-                    return ListTile(
-                      isThreeLine: true,
-                      minLeadingWidth: 10,
-                      minVerticalPadding: 20,
-                      contentPadding: const EdgeInsets.all(0),
-                      leading: Container(
-                          width: 40,
-                          height: 40,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Repository.accentColor(context),
-                            boxShadow: [
-                              BoxShadow(
-                                offset: const Offset(0, 1),
-                                color: Colors.white.withOpacity(0.1),
-                                blurRadius: 2,
-                                spreadRadius: 1,
-                              )
-                            ],
-                            image: i == 0
-                                ? null
-                                : DecorationImage(
-                                    image: AssetImage(trs['avatar']),
-                                    fit: BoxFit.cover,
-                                  ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: i == 0
-                              ? Icon(trs['icon'],
-                                  color: const Color(0xFFFF736C), size: 20)
-                              : const SizedBox()),
-                      title: Text(trs['name'],
-                          style: TextStyle(
-                              color: Repository.textColor(context),
-                              fontWeight: FontWeight.w500)),
-                      subtitle: Text(trs['date'],
-                          style: TextStyle(
-                              color: Repository.subTextColor(context))),
-                      trailing: Text(trs['amount'],
-                          style: const TextStyle(
-                              fontSize: 17, color: Colors.white)),
-                    );
-                  },
+                        )
+                      ]),
                 ),
-              )
-            ],
-          ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Pendientes por subir',
+                        style: TextStyle(
+                            color: Repository.textColor(context),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                FutureBuilder(
+                    future: _futureGrupo,
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        default:
+                          if (snapshot.hasError) {
+                            return Column(
+                              children: const [
+                                Icon(Icons.error),
+                                Text('Failed to fetch data.'),
+                              ],
+                            );
+                          } else {
+                            return Column(
+                                children: createListView(
+                                    context, snapshot.data, size));
+                          }
+                      }
+                    })
+              ]),
         ],
       ),
     );
+  }
+
+  List<Widget> createListView(context, dataResponse, size) {
+    List<Widget> widgetView = [];
+    print(dataResponse);
+    for (var grupos in dataResponse) {
+      widgetView.add(const Gap(15));
+      widgetView.add(InkWell(
+        onTap: () {
+          print(grupos);
+          uploadGrupo(grupos);
+        },
+        child: FittedBox(
+          child: SizedBox(
+            height: size.height * 0.15,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: size.width,
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Repository.headerColor2(context),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Flexible(
+                              child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(grupos['curso'],
+                                      maxLines: 1,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 21,
+                                          color: Colors.white)))),
+                        ],
+                      ),
+                      const Gap(24),
+                      customColumn(title: 'grupo', subtitle: grupos['cct']),
+                      const Gap(15)
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ));
+    }
+
+    return widgetView;
   }
 
   showDownloadDBDialog(BuildContext context) {
@@ -224,7 +273,9 @@ class _HomeState extends State<Home> {
           await downloadDB();
           Navigator.pop(context);
           DialogBuilder(context).hideOpenDialog();
-        } else {}
+        } else {
+          print('No hay conexion');
+        }
       },
     );
 
@@ -249,19 +300,31 @@ class _HomeState extends State<Home> {
     );
   }
 
-  showCircularProgress() {
-    Column column = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Visibility(
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            visible: visible,
-            child: Container(
-                margin: const EdgeInsets.only(top: 50, bottom: 30),
-                child: const CircularProgressIndicator())),
+  showNoInternetConn(BuildContext context) {
+    // set up the buttons
+
+    Widget continueButton = TextButton(
+      child: const Text('Aceptar'),
+      onPressed: () async {
+        Navigator.pop(context);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text('Error'),
+      content: const Text('No cuentas con una conexion a internet'),
+      actions: [
+        continueButton,
       ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 }
@@ -354,297 +417,14 @@ Future<List> _getAlumnosPre() async {
 }
 
 Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
-  var databasesPath = await getDatabasesPath();
-  String path = join(databasesPath, 'syvic_offline.db');
-  await deleteDatabase(path);
-
-  Database database = await openDatabase(path, version: 1,
-      onCreate: (Database db, int version) async {
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_offline (
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          curso TEXT,
-          cct TEXT,
-          unidad TEXT,
-          clave TEXT,
-          mod TEXT,
-          inicio DATE,
-          termino DATE,
-          area TEXT,
-          espe TEXT,
-          tcapacitacion TEXT,
-          depen TEXT,
-          tipo_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_offline(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          matricula TEXT,
-          nombre TEXT,
-          curp TEXT,
-          id_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_offline(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          nombre TEXT,
-          apellido_paterno TEXT,
-          apellido_materno TEXT,
-          correo TEXT,
-          telefono TEXT,
-          curp TEXT,
-          sexo TEXT,
-          fecha_nacimiento TEXT,
-          domicilio TEXT,
-          colonia TEXT,
-          municipio TEXT,
-          estado TEXT,
-          estado_civil TEXT,
-          matricula TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_temp(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          curso TEXT,
-          cct TEXT,
-          unidad TEXT,
-          clave TEXT,
-          mod TEXT,
-          inicio DATE,
-          termino DATE,
-          area TEXT,
-          espe TEXT,
-          tcapacitacion TEXT,
-          depen TEXT,
-          tipo_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_temp(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          matricula TEXT,
-          nombre TEXT,
-          curp TEXT,
-          id_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_temp(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          id_curso INTEGER,
-          nombre TEXT,
-          apellido_paterno TEXT,
-          apellido_materno TEXT,
-          correo TEXT,
-          telefono TEXT,
-          curp TEXT,
-          sexo TEXT,
-          fecha_nacimiento TEXT,
-          domicilio TEXT,
-          colonia TEXT,
-          municipio TEXT,
-          estado TEXT,
-          estado_civil TEXT,
-          matricula TEXT,
-          seccion_vota TEXT,
-          numExt TEXT,
-          numInt TEXT,
-          resp_satisfaccion TEXT,
-          com_satisfaccion TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-  });
-  
-
-  await database.transaction((txn) async {
-    for (var item in grupos) {
-      await txn.rawInsert(
-          'INSERT INTO tbl_grupo_offline(id_registro, curso, cct, unidad, clave, mod, inicio, termino, area, espe, tcapacitacion, depen, tipo_curso) '
-          'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
-          [
-            item['id'],
-            item['curso'],
-            item['cct'],
-            item['unidad'],
-            item['clave'],
-            item['mod'],
-            item['inicio'],
-            item['termino'],
-            item['area'],
-            item['espe'],
-            item['tcapacitacion'],
-            item['depen'],
-            item['tipo_curso']
-          ]);
-    }
-    print('inserted grupos  rows: ${grupos.length}');
-
-    for (var item in alumnosIns) {
-      await txn.rawInsert(
-          'INSERT INTO tbl_inscripcion_offline(id_registro, matricula, nombre, curp, id_curso ) '
-          'VALUES(?, ?, ?, ?, ?)',
-          [
-            item['id'],
-            item['matricula'],
-            item['alumno'],
-            item['curp'],
-            item['id_curso']
-          ]);
-    }
-    print('inserted alumnos rows: ${alumnosIns.length}');
-
-    for (var item in alumnosPre) {
-      await txn.rawInsert(
-          'INSERT INTO alumnos_pre_offline(id_registro, nombre, apellido_paterno, apellido_materno, correo, telefono, curp, sexo, fecha_nacimiento, domicilio, colonia, municipio, estado, estado_civil, matricula) '
-          'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-          [
-            item['id'],
-            item['nombre'],
-            item['apellido_paterno'],
-            item['apellido_materno'],
-            item['correo'],
-            item['telefono'],
-            item['curp'],
-            item['sexo'],
-            item['fecha_nacimiento'],
-            item['domicilio'],
-            item['colonia'],
-            item['municipio'],
-            item['estado'],
-            item['estado_civil'],
-            item['matricula']
-          ]);
-    }
-    print('inserted alumnos pre rows: ${alumnosPre.length}');
-  });
-
+  await dowloadDB(grupos, alumnosIns, alumnosPre);
   return [
     {'done'}
   ];
 }
 
 Future createTables() async {
-  var databasesPath = await getDatabasesPath();
-  String path = join(databasesPath, 'syvic_offline.db');
-  await deleteDatabase(path);
-
-  Database database = await openDatabase(path, version: 1,
-      onCreate: (Database db, int version) async {
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_offline (
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          curso TEXT,
-          cct TEXT,
-          unidad TEXT,
-          clave TEXT,
-          mod TEXT,
-          inicio DATE,
-          termino DATE,
-          area TEXT,
-          espe TEXT,
-          tcapacitacion TEXT,
-          depen TEXT,
-          tipo_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_offline(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          matricula TEXT,
-          nombre TEXT,
-          curp TEXT,
-          id_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_offline(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          nombre TEXT,
-          apellido_paterno TEXT,
-          apellido_materno TEXT,
-          correo TEXT,
-          telefono TEXT,
-          curp TEXT,
-          sexo TEXT,
-          fecha_nacimiento TEXT,
-          domicilio TEXT,
-          colonia TEXT,
-          municipio TEXT,
-          estado TEXT,
-          estado_civil TEXT,
-          matricula TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_temp(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          curso TEXT,
-          cct TEXT,
-          unidad TEXT,
-          clave TEXT,
-          mod TEXT,
-          inicio DATE,
-          termino DATE,
-          area TEXT,
-          espe TEXT,
-          tcapacitacion TEXT,
-          depen TEXT,
-          tipo_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_temp(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          matricula TEXT,
-          nombre TEXT,
-          curp TEXT,
-          id_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_temp(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          id_curso INTEGER,
-          nombre TEXT,
-          apellido_paterno TEXT,
-          apellido_materno TEXT,
-          correo TEXT,
-          telefono TEXT,
-          curp TEXT,
-          sexo TEXT,
-          fecha_nacimiento TEXT,
-          domicilio TEXT,
-          colonia TEXT,
-          municipio TEXT,
-          estado TEXT,
-          estado_civil TEXT,
-          matricula TEXT,
-          seccion_vota TEXT,
-          numExt TEXT,
-          numInt TEXT,
-          resp_satisfaccion TEXT,
-          com_satisfaccion TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-  });
-
-  for (var row
-      in (await database.query('sqlite_master', columns: ['type', 'name']))) {
-    print(row.values);
-  }
+  helperCreateTables();
 }
 
 Future<bool> checkInternetConnection() async {
@@ -666,4 +446,93 @@ Future<bool> verifyIfTableExist(db, tableName) async {
   } else {
     return true;
   }
+}
+
+Widget customColumn({required String title, required String subtitle}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title.toUpperCase(),
+          style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.5))),
+      const Gap(2),
+      Text(subtitle,
+          style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.8))),
+    ],
+  );
+}
+
+Future uploadGrupo(grupo) async {
+  var connection = PostgreSQLConnection('10.0.2.2', 5432, 'server_movil',
+      username: 'postgres', password: '8552');
+  await connection.open();
+  inspect(grupo);
+
+  List<List<dynamic>> results =
+      await connection.query('Select * from public.prueba');
+  var id_grupo;
+  await connection.transaction((ctx) async {
+    // id_grupo = await ctx.query(
+    //     'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion,depen, tipo_curso ) '
+    //     'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depe:text, @tipo_curso:text) RETURNING id',
+    //     substitutionValues: {
+    //       'curso': grupo['curso'],
+    //       'cct': grupo['cct'],
+    //       'unidad': grupo['unidad'],
+    //       'clave': grupo['clave'],
+    //       'mod': grupo['mod'],
+    //       'area': grupo['area'],
+    //       'espe': grupo['espe'],
+    //       'tcapacitacion': grupo['tcapacitacion'],
+    //       'depen': grupo['depen'],
+    //       'tipo_curso': grupo['tipo_curso']
+    //     });
+    // print(id_grupo);
+
+    // List alumnos = await getAlumnos(grupo['id_registro']);
+
+    // for (final alumno in alumnos) {
+    //   print(alumno);
+    //   var result = await ctx.query(
+    //       'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento,'
+    //       'domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion ) '
+    //       'VALUES (@id_curso:bigint, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id',
+    //       substitutionValues: {
+    //         'id_curso': id_grupo[0],
+    //         'nombre': alumno['cct'],
+    //         'curo': alumno['unidad'],
+    //         'matricula': alumno['clave'],
+    //         'apellido_paterno': alumno['mod'],
+    //         'apellido_materno': alumno['area'],
+    //         'correo': alumno['espe'],
+    //         'telefono': alumno['tcapacitacion'],
+    //         'sexo': alumno['depen'],
+    //         'fecha_nacimiento': alumno['tipo_curso'],
+    //         'domicilio': alumno['domicilio'],
+    //         'estado': alumno['estado'],
+    //         'estado_civil': alumno['estado_civil'],
+    //         'seccion_vota': alumno['seccion_vota'],
+    //         'calle': '', //calle
+    //         'num_ext': alumno['num_ext'],
+    //         'num_int': alumno['num_int'],
+    //         'resp_satisfaccion': alumno['resp_satisfaccion'],
+    //         'com_satisfaccion': alumno['com_satisfaccion'],
+    //       });
+    //   print(result);
+    // }
+  });
+
+  connection.close();
+}
+
+getAlumnos(id_curso) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+  // await deleteDatabase(path);
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+  List alumnos_temp = await database
+      .rawQuery('SELECT * FROM alumnos_pre_temp where id_curso = $id_curso');
+
+  return alumnos_temp;
 }

@@ -14,6 +14,8 @@ class Grupo {
   String tcapacitacion = '';
   String depen = '';
   String tipoCurso = '';
+  int isEditing = 0;
+  int isQueue = 0;
   List<Alumno> alumnos = [];
   Grupo(
       this.id,
@@ -32,7 +34,6 @@ class Grupo {
 
   setAlumnos(response) {
     for (var item in response) {
-      
       Alumno alu = Alumno(
         item['id'],
         item['id_curso'],

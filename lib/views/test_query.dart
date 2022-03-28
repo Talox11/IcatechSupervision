@@ -189,9 +189,12 @@ void testQuery2() async {
   List<Map> grupos_temp =
       await database.rawQuery('SELECT * FROM tbl_grupo_temp');
   List<Map> inscripcion_temp =
-      await database.rawQuery('SELECT * FROM tbl_inscripcion_temp');
+      await database.rawQuery('SELECT COUNT(*) FROM tbl_inscripcion_temp');
   List<Map> alumnos_temp =
-      await database.rawQuery('SELECT * FROM alumnos_pre_temp');
+      await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_temp where id_curso = 222260047');
+
+        List<Map> queue =
+      await database.rawQuery('SELECT * FROM tbl_queue_grupos');
 
   print('============== grupos');
   for (var item in grupos) {
@@ -216,6 +219,11 @@ void testQuery2() async {
   }
   print('============== alumnos_temp');
   for (var item in alumnos_temp) {
+    print(item);
+  }
+
+  print('============== queue');
+  for (var item in queue) {
     print(item);
   }
 }

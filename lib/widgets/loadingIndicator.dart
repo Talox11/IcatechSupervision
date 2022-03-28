@@ -9,10 +9,10 @@ class DialogBuilder {
   void showLoadingIndicator() {
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return WillPopScope(
-            onWillPop: () async => false,
+            onWillPop: () async => true ,
             child: AlertDialog(
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8.0))
@@ -30,6 +30,7 @@ class DialogBuilder {
   void hideOpenDialog() {
     Navigator.of(context).pop();
   }
+
 }
 
 class LoadingIndicator extends StatelessWidget{

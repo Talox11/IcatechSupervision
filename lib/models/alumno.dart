@@ -1,5 +1,5 @@
 class Alumno {
-  String id = '';
+  String id = ''; //id_registro
   String idCurso = '';
   String nombre = '';
   String curp = '';
@@ -20,6 +20,8 @@ class Alumno {
   String? numExt;
   String? numInt;
   String? observaciones;
+  String? respSatisfaccion;
+  String? comSatisfaccion;
 
   Alumno(
     this.id,
@@ -38,13 +40,15 @@ class Alumno {
     this.estadoCivil,
   );
 
-  addNewInfo(
-      entidadNacimiento, seccionVota, calle, numExt, numInt, observaciones) {
+  addNewInfo(entidadNacimiento, seccionVota, calle, numExt, numInt,
+      observaciones,respSatisfaccion, comSatisfaccion) {
     this.entidadNacimiento = entidadNacimiento;
     this.seccionVota = seccionVota;
     this.calle = calle;
     this.numExt = numExt;
     this.numInt = numInt;
     this.observaciones = observaciones;
+    this.respSatisfaccion = respSatisfaccion;
+    this.comSatisfaccion = comSatisfaccion;
   }
 }

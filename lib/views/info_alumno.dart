@@ -1,32 +1,34 @@
-import 'dart:convert';
 import 'dart:developer';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/models/alumno.dart';
 import 'package:flutter_banking_app/widgets/buttons.dart';
 import 'package:flutter_banking_app/widgets/default_text_field.dart';
-import 'package:flutter_banking_app/widgets/form_builder.dart';
+
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/widgets/separator.dart';
 import 'package:gap/gap.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart'; // join()
 import '../utils/size_config.dart';
+import '../widgets/loadingIndicator.dart';
 
 class InfoAlumno extends StatefulWidget {
   final Alumno alumno;
-  const InfoAlumno({Key? key, required this.alumno}) : super(key: key);
+  final String clave;
+  const InfoAlumno({Key? key, required this.alumno, required this.clave})
+      : super(key: key);
 
   @override
   State<InfoAlumno> createState() => _InfoAlumnoState();
 }
 
 class _InfoAlumnoState extends State<InfoAlumno> {
+  String claveGrupo = '';
   final TextEditingController _entidadNacimiento = TextEditingController();
   final TextEditingController _seccionVota = TextEditingController();
   final TextEditingController _calle = TextEditingController();
@@ -67,20 +69,17 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   bool checkedValueNo12 = false;
   bool checkedValueSi13 = false;
   bool checkedValueNo13 = false;
-  bool checkedValueSi14 = false;
-  bool checkedValueNo14 = false;
-  bool checkedValueSi15 = false;
-  bool checkedValueNo15 = false;
-  bool checkedValueSi16 = false;
-  bool checkedValueNo16 = false;
-  bool checkedValueSi17 = false;
-  bool checkedValueNo17 = false;
 
   String dropdownValue = 'Selecciona una opcion';
 
   @override
   void initState() {
+    claveGrupo = widget.clave;
     inspect(widget.alumno);
+    if (widget.alumno.respSatisfaccion != '') {
+      setCheckedValues(widget.alumno);
+    }
+
     super.initState();
   }
 
@@ -159,24 +158,28 @@ class _InfoAlumnoState extends State<InfoAlumno> {
             const Gap(50),
             separatorText(context: context, text: 'Informacion General'),
             DefaultTextField(
-                controller: _nombreCompleto,
-                title: 'Nombre y Apellidos',
-                label: widget.alumno.nombre +
-                    ' ' +
-                    widget.alumno.apellidoPaterno +
-                    ' ' +
-                    widget.alumno.apellidoMaterno,
-                enabled: false),
+              controller: _nombreCompleto,
+              title: 'Nombre y Apellidos',
+              label: widget.alumno.nombre +
+                  ' ' +
+                  widget.alumno.apellidoPaterno +
+                  ' ' +
+                  widget.alumno.apellidoMaterno,
+              enabled: false,
+              isRequired: true,
+            ),
             DefaultTextField(
                 controller: _curp,
                 title: 'CURP',
                 label: widget.alumno.curp,
-                enabled: false),
+                enabled: false,
+                isRequired: true),
             DefaultTextField(
                 controller: _domicilio,
                 title: 'Domicilio',
                 label: widget.alumno.domicilio,
-                enabled: false),
+                enabled: false,
+                isRequired: true),
             Row(
               children: [
                 Flexible(
@@ -184,7 +187,8 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       controller: _domicilio,
                       title: 'Municipio',
                       label: widget.alumno.estado,
-                      enabled: false),
+                      enabled: false,
+                      isRequired: true),
                 ),
                 const Gap(10),
                 Flexible(
@@ -192,7 +196,8 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                         controller: _estado,
                         title: 'Estado',
                         label: widget.alumno.estado,
-                        enabled: false)),
+                        enabled: false,
+                        isRequired: true)),
               ],
             ),
             Row(
@@ -202,7 +207,8 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       controller: _correo,
                       title: 'Correo',
                       label: widget.alumno.correo,
-                      enabled: false),
+                      enabled: false,
+                      isRequired: true),
                 ),
                 const Gap(10),
                 Flexible(
@@ -211,7 +217,8 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       title: 'Telefono',
                       label: widget.alumno.telefono,
                       obscure: true,
-                      enabled: false),
+                      enabled: false,
+                      isRequired: true),
                 ),
               ],
             ),
@@ -219,8 +226,9 @@ class _InfoAlumnoState extends State<InfoAlumno> {
             DefaultTextField(
                 controller: _entidadNacimiento,
                 title: 'Entidad nacimiento',
-                label: 'Nacimiento',
-                enabled: true),
+                label: widget.alumno.fechaNacimiento,
+                enabled: true,
+                isRequired: true),
             Row(
               children: [
                 Flexible(
@@ -228,7 +236,8 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       controller: _calle,
                       title: 'Calle',
                       label: 'Introduzca su direccion',
-                      enabled: true),
+                      enabled: true,
+                      isRequired: true),
                 ),
               ],
             ),
@@ -241,7 +250,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       label: '###',
                       obscure: true,
                       enabled: true,
-                      isRequired: true),
+                      isRequired: false),
                 ),
                 const Gap(10),
                 Flexible(
@@ -266,13 +275,14 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               ],
             ),
             DefaultTextField(
-                controller: _observaciones,
-                title: 'Observaciones',
-                label: 'Escriba aqui sus observaciones',
-                obscure: false,
-                enabled: true,
-                maxLines: 8,
-                isRequired: false),
+              controller: _observaciones,
+              title: 'Observaciones',
+              label: 'Escriba aqui sus observaciones',
+              obscure: false,
+              enabled: true,
+              isRequired: false,
+              maxLines: 8,
+            ),
             separatorText(context: context, text: 'Preguntas de Satisfaccion'),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,11 +490,348 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                 )
               ],
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        'Si el curso fue a distancia ¿La conectividad a internet fue constante sin interrupciones?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi6,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi6 = newValue!;
+                      checkedValueNo6 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo6,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo6 = newValue!;
+                      checkedValueSi6 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        '¿El tiempo de duración del curso (días), es aceptable?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi7,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi7 = newValue!;
+                      checkedValueNo7 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo7,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo7 = newValue!;
+                      checkedValueSi7 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text('¿¿El horario diario del curso es aceptable?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi8,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi8 = newValue!;
+                      checkedValueNo8 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo8,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo8 = newValue!;
+                      checkedValueSi8 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        '¿Quedaste satisfecho(a) con el contenido del curso?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi9,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi9 = newValue!;
+                      checkedValueNo9 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo9,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo9 = newValue!;
+                      checkedValueSi9 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        '¿El curso es lo que esperabas, aprendiste suficiente para ponerlo en práctica?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi10,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi10 = newValue!;
+                      checkedValueNo10 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo10,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo10 = newValue!;
+                      checkedValueSi10 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        '¿El instructor fue claro en la explicación del curso?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi11,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi11 = newValue!;
+                      checkedValueNo11 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo11,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo11 = newValue!;
+                      checkedValueSi11 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        '¿El material de apoyo del Instructor fue bueno? (presentaciones, videos, audios, etc.?',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi12,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi12 = newValue!;
+                      checkedValueNo12 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo12,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo12 = newValue!;
+                      checkedValueSi12 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    child: Text(
+                        '¿El Instructor motivó a los asistentes a participar en clase, por lo que ésta fue dinámica ? ',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                CheckboxListTile(
+                  title: const Text("SI'"),
+                  value: checkedValueSi13,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi13 = newValue!;
+                      checkedValueNo13 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text("NO'"),
+                  value: checkedValueNo13,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo13 = newValue!;
+                      checkedValueSi13 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
             elevatedButton(
               color: Repository.selectedItemColor(context),
               context: context,
               callback: () {
-                updateInfoAlumno();
+                try {
+                  if (validateAnswers()) {
+                    updateInfoAlumno();
+                  } else {
+                    print('no valid form');
+                     DialogBuilder(context).showLoadingIndicator();
+                  }
+                  // Navigator.pop(context);
+                } catch (e) {
+                  throw e;
+                }
               },
               text: 'Guardar',
             )
@@ -492,34 +839,316 @@ class _InfoAlumnoState extends State<InfoAlumno> {
         ));
   }
 
-  void updateInfoAlumno() {
-     print(_entidadNacimiento.text);
-  print(_seccionVota.text);
-  print(_calle.text);
-  print(_numExt.text);
-  print(_numInt.text);
-  print(_observaciones.text);
+  void updateInfoAlumno() async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'syvic_offline.db');
 
-  print(_nombreCompleto.text);
-  print(_domicilio.text);
-  print(_curp.text);
-  print(_estado.text);
-  print(_correo.text);
-  print(_numeroTelefono.text);
-    
+    Database database = await openDatabase(path,
+        version: 1, onCreate: (Database db, int version) async {});
+    await validateAnswers();
+    await database.transaction((txn) async {
+      txn.rawInsert(
+          'UPDATE alumnos_pre_temp SET seccion_vota = "${_seccionVota.text}", numExt = "${_numExt.text}", numInt = "${_numInt.text}", resp_satisfaccion="${await getRespSatisfaccion()}", com_satisfaccion ="NA"'
+          'WHERE id_registro = ${widget.alumno.id}');
+    });
+  }
+
+  Future<String> getRespSatisfaccion() async {
+    String result = '';
+
+    if (checkedValueSi1) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi2) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi3) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi4) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi5) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi6) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi7) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi8) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi9) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi10) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi11) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi12) {
+      result = result + 'Si,';
+    } else {
+      result = result + 'No,';
+    }
+    if (checkedValueSi13) {
+      result = result + 'Si';
+    } else {
+      result = result + 'No';
+    }
+
+    return result;
+  }
+
+  validateAnswers() {
+    bool isValid = false;
+
+    if (_entidadNacimiento.text.isNotEmpty &&
+        _seccionVota.text.isNotEmpty &&
+        _calle.text.isNotEmpty &&
+        _numExt.text.isNotEmpty) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi1 != checkedValueNo1) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi2 != checkedValueNo2) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi3 != checkedValueNo3) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi4 != checkedValueNo4) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi5 != checkedValueNo5) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi6 != checkedValueNo6) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi7 != checkedValueNo7) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi8 != checkedValueNo8) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi9 != checkedValueNo9) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi10 != checkedValueNo10) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi11 != checkedValueNo11) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi12 != checkedValueNo12) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    if (checkedValueSi13 != checkedValueNo13) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
+    return isValid;
+    ;
+  }
+
+  Widget customColumn({required String title, required String subtitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title.toUpperCase(),
+            style: const TextStyle(fontSize: 14, color: Colors.white)),
+        const Gap(4),
+        Text(subtitle,
+            style: const TextStyle(fontSize: 18, color: Colors.white)),
+      ],
+    );
+  }
+
+  Future<List> ifTempRecordExist(database, idRegistro) async {
+    List row = await database.query('alumnos_pre_temp',
+        where: 'id_registro = ?', whereArgs: [idRegistro]);
+    if (row.isEmpty) {
+      return [];
+    } else {
+      return row;
+    }
+  }
+
+  setCheckedValues(Alumno alumnoInfo) {
+    List valuesChecked = alumnoInfo.respSatisfaccion!.split(',');
+    print(valuesChecked);
+    if (valuesChecked[0] == 'Si') {
+      checkedValueSi1 = true;
+      checkedValueNo1 = false;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = true;
+    }
+    if (valuesChecked[1] == 'Si') {
+      checkedValueSi2 = true;
+      checkedValueNo2 = false;
+    } else {
+      checkedValueSi2 = false;
+      checkedValueNo2 = true;
+    }
+    if (valuesChecked[2] == 'Si') {
+      checkedValueSi3 = true;
+      checkedValueNo3 = false;
+    } else {
+      checkedValueSi3 = false;
+      checkedValueNo3 = true;
+    }
+    if (valuesChecked[3] == 'Si') {
+      checkedValueSi4 = true;
+      checkedValueNo4 = false;
+    } else {
+      checkedValueSi4 = false;
+      checkedValueNo4 = true;
+    }
+    if (valuesChecked[4] == 'Si') {
+      checkedValueSi5 = true;
+      checkedValueNo5 = false;
+    } else {
+      checkedValueSi5 = false;
+      checkedValueNo5 = true;
+    }
+    if (valuesChecked[5] == 'Si') {
+      checkedValueSi6 = true;
+      checkedValueNo6 = false;
+    } else {
+      checkedValueSi6 = false;
+      checkedValueNo6 = true;
+    }
+    if (valuesChecked[6] == 'Si') {
+      checkedValueSi7 = true;
+      checkedValueNo7 = false;
+    } else {
+      checkedValueSi7 = false;
+      checkedValueNo7 = true;
+    }
+    if (valuesChecked[7] == 'Si') {
+      checkedValueSi8 = true;
+      checkedValueNo8 = false;
+    } else {
+      checkedValueSi8 = false;
+      checkedValueNo8 = true;
+    }
+    if (valuesChecked[8] == 'Si') {
+      checkedValueSi9 = true;
+      checkedValueNo9 = false;
+    } else {
+      checkedValueSi9 = false;
+      checkedValueNo9 = true;
+    }
+    if (valuesChecked[9] == 'Si') {
+      checkedValueSi10 = true;
+      checkedValueNo10 = false;
+    } else {
+      checkedValueSi10 = false;
+      checkedValueNo10 = true;
+    }
+    if (valuesChecked[10] == 'Si') {
+      checkedValueSi11 = true;
+      checkedValueNo11 = false;
+    } else {
+      checkedValueSi11 = false;
+      checkedValueNo11 = true;
+    }
+    if (valuesChecked[11] == 'Si') {
+      checkedValueSi12 = true;
+      checkedValueNo12 = false;
+    } else {
+      checkedValueSi12 = false;
+      checkedValueNo12 = true;
+    }
+    if (valuesChecked[12] == 'Si') {
+      checkedValueSi13 = true;
+      checkedValueNo13 = false;
+    } else {
+      checkedValueSi13 = false;
+      checkedValueNo13 = true;
+    }
+  }
+
+  showFormNoCompleted(BuildContext context) {
+    // set up the buttons
+
+    Widget continueButton = TextButton(
+      child: const Text('Aceptar'),
+      onPressed: () async {
+        Navigator.pop(context);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text('Error'),
+      content: const Text('Faltan algunos campos por rellenar.'),
+      actions: [
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
-
-Widget customColumn({required String title, required String subtitle}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(title.toUpperCase(),
-          style: const TextStyle(fontSize: 14, color: Colors.white)),
-      const Gap(4),
-      Text(subtitle, style: const TextStyle(fontSize: 18, color: Colors.white)),
-    ],
-  );
-}
-
-void saveAlumno(data) async {}

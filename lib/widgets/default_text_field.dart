@@ -23,7 +23,7 @@ class DefaultTextField extends StatelessWidget {
     this.enabled,
     this.label,
     this.maxLines,
-    this.isRequired,
+    required this.isRequired,
   }) : super(key: key);
 
   final FocusNode? focusNode;
@@ -40,7 +40,7 @@ class DefaultTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final bool? enabled;
   final int? maxLines;
-  final bool? isRequired;
+  final bool isRequired;
   String get _title => title;
   //String? get _label => _label;
   Widget? get _suffixIcon => suffixIcon;
@@ -71,11 +71,10 @@ class DefaultTextField extends StatelessWidget {
           textInputAction: textInputAction ?? TextInputAction.next,
           onFieldSubmitted: onFieldSubmitted,
           validator: (value) {
-            if (value!.isEmpty && isRequired!) {
+            if ((value == null || value.isEmpty ) && isRequired) {
               return 'Este campo es obligatorio';
             }
-
-            return validator?.call(value);
+            return null;
           },
           controller: controller,
           decoration: inputDecoration(
