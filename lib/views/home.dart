@@ -196,12 +196,11 @@ class _HomeState extends State<Home> {
 
   List<Widget> createListView(context, dataResponse, size) {
     List<Widget> widgetView = [];
-    print(dataResponse);
+
     for (var grupos in dataResponse) {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
         onTap: () {
-          print(grupos);
           uploadGrupo(grupos);
         },
         child: FittedBox(
@@ -465,60 +464,69 @@ Future uploadGrupo(grupo) async {
   var connection = PostgreSQLConnection('10.0.2.2', 5432, 'server_movil',
       username: 'postgres', password: '8552');
   await connection.open();
-  inspect(grupo);
 
   List<List<dynamic>> results =
       await connection.query('Select * from public.prueba');
-  var id_grupo;
+  var row;
   await connection.transaction((ctx) async {
-    // id_grupo = await ctx.query(
-    //     'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion,depen, tipo_curso ) '
-    //     'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depe:text, @tipo_curso:text) RETURNING id',
-    //     substitutionValues: {
-    //       'curso': grupo['curso'],
-    //       'cct': grupo['cct'],
-    //       'unidad': grupo['unidad'],
-    //       'clave': grupo['clave'],
-    //       'mod': grupo['mod'],
-    //       'area': grupo['area'],
-    //       'espe': grupo['espe'],
-    //       'tcapacitacion': grupo['tcapacitacion'],
-    //       'depen': grupo['depen'],
-    //       'tipo_curso': grupo['tipo_curso']
-    //     });
-    // print(id_grupo);
+    row = await ctx.query(
+        'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion, depen, tipo_curso ) '
+        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id ',
+        substitutionValues: {
+          'curso': grupo['curso'],
+          'cct': grupo['cct'],
+          'unidad': grupo['unidad'],
+          'clave': grupo['clave'],
+          'mod': grupo['mod'],
+          'area': grupo['area'] ?? 'N/A',
+          'espe': grupo['espe'],
+          'tcapacitacion': grupo['tcapacitacion'],
+          'depen': grupo['depen'],
+          'tipo_curso': grupo['tipo_curso'],
+        });
 
-    // List alumnos = await getAlumnos(grupo['id_registro']);
+    return row[0];
+    // );
+  }).then((insertedId) async {
+    
+    await connection.transaction((ctx) async {
+      
+      List alumnos = await getAlumnos(grupo['id_registro']);
 
-    // for (final alumno in alumnos) {
-    //   print(alumno);
-    //   var result = await ctx.query(
-    //       'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento,'
-    //       'domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion ) '
-    //       'VALUES (@id_curso:bigint, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id',
-    //       substitutionValues: {
-    //         'id_curso': id_grupo[0],
-    //         'nombre': alumno['cct'],
-    //         'curo': alumno['unidad'],
-    //         'matricula': alumno['clave'],
-    //         'apellido_paterno': alumno['mod'],
-    //         'apellido_materno': alumno['area'],
-    //         'correo': alumno['espe'],
-    //         'telefono': alumno['tcapacitacion'],
-    //         'sexo': alumno['depen'],
-    //         'fecha_nacimiento': alumno['tipo_curso'],
-    //         'domicilio': alumno['domicilio'],
-    //         'estado': alumno['estado'],
-    //         'estado_civil': alumno['estado_civil'],
-    //         'seccion_vota': alumno['seccion_vota'],
-    //         'calle': '', //calle
-    //         'num_ext': alumno['num_ext'],
-    //         'num_int': alumno['num_int'],
-    //         'resp_satisfaccion': alumno['resp_satisfaccion'],
-    //         'com_satisfaccion': alumno['com_satisfaccion'],
-    //       });
-    //   print(result);
-    // }
+      for (final alumno in alumnos) {
+        
+        var result = await ctx.query(
+            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento,'
+            'domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion ) '
+            'VALUES (@id_curso:int4, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, '
+            '@sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, '
+            '@num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id',
+            substitutionValues: {
+              'id_curso': insertedId.single,
+              'nombre': alumno['nombre'],
+              'curp': alumno['curp'],
+              'matricula': alumno['matricula'],
+              'apellido_paterno': alumno['apellido_paterno'],
+              'apellido_materno': alumno['apellido_materno'],
+              'correo': alumno['correo'],
+              'telefono': alumno['telefono'],
+              'sexo': alumno['sexo'],
+              'fecha_nacimiento': alumno['fecha_nacimiento'],
+              'domicilio': alumno['domicilio'],
+              'estado': alumno['estado'],
+              'estado_civil': alumno['estado_civil'],
+              'entidad_nacimiento': '', //entidad nacimiento,
+              'seccion_vota': alumno['seccion_vota'],
+              'calle': '', //calle
+              'num_ext': alumno['numExt'],
+              'num_int': alumno['numInt'],
+              'observaciones': '', //observaciones
+              'resp_satisfaccion': alumno['resp_satisfaccion'],
+              'com_satisfaccion': alumno['com_satisfaccion'],
+            });
+        print(result);
+      }
+    });
   });
 
   connection.close();
