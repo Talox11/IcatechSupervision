@@ -138,9 +138,18 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         InkWell(
-                          onTap: () {
-                            // call this method
-                            showSyncDialog(context);
+                          onTap: () async {
+                            //update
+                            checkInternetConnection().then((connected) async{
+                              if (connected) {
+                                await showSyncDialog(context, this);
+                                setState(() {
+                                  _futureGrupo = getQueueUpload();
+                                });
+                              } else {
+                                showNoInternetConn(context);
+                              }
+                            });
                           },
                           child: Container(
                             padding: const EdgeInsets.all(16),
@@ -184,7 +193,7 @@ class _HomeState extends State<Home> {
                           } else {
                             return Column(
                                 children: createListView(
-                                    context, snapshot.data, size));
+                                    context, snapshot.data, size, this));
                           }
                       }
                     })
@@ -194,14 +203,23 @@ class _HomeState extends State<Home> {
     );
   }
 
-  List<Widget> createListView(context, dataResponse, size) {
+  List<Widget> createListView(context, dataResponse, size, state) {
     List<Widget> widgetView = [];
 
     for (var grupos in dataResponse) {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
-        onTap: () {
-          uploadGrupo(grupos);
+        onTap: () async {
+          await checkInternetConnection().then((onValue) {
+            if (onValue) {
+              uploadGrupo(grupos);
+              state.setState(() {
+                _futureGrupo = getQueueUpload();
+              });
+            } else {
+              showNoInternetConn(context);
+            }
+          });
         },
         child: FittedBox(
           child: SizedBox(
@@ -328,7 +346,7 @@ class _HomeState extends State<Home> {
   }
 }
 
-showSyncDialog(BuildContext context) {
+showSyncDialog(BuildContext context, state) {
   // set up the buttons
   Widget cancelButton = TextButton(
     child: const Text('Cancelar'),
@@ -339,7 +357,8 @@ showSyncDialog(BuildContext context) {
   Widget continueButton = TextButton(
     child: const Text('Continuar'),
     onPressed: () {
-      print('descargar');
+      uploadAllGrupos(state);
+
       Navigator.pop(context);
     },
   );
@@ -362,6 +381,21 @@ showSyncDialog(BuildContext context) {
       return alert;
     },
   );
+}
+
+uploadAllGrupos(state) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  List gruposList = await database
+      .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
+  print(gruposList);
+  for (var grupo in gruposList) {
+    await uploadGrupo(grupo);
+  }
 }
 
 Future<List> downloadDB() async {
@@ -471,7 +505,7 @@ Future uploadGrupo(grupo) async {
   await connection.transaction((ctx) async {
     row = await ctx.query(
         'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion, depen, tipo_curso ) '
-        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id ',
+        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id as id_inserted ',
         substitutionValues: {
           'curso': grupo['curso'],
           'cct': grupo['cct'],
@@ -484,25 +518,18 @@ Future uploadGrupo(grupo) async {
           'depen': grupo['depen'],
           'tipo_curso': grupo['tipo_curso'],
         });
-
-    return row[0];
+    return row;
     // );
   }).then((insertedId) async {
-    
     await connection.transaction((ctx) async {
-      
       List alumnos = await getAlumnos(grupo['id_registro']);
 
       for (final alumno in alumnos) {
-        
         var result = await ctx.query(
-            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento,'
-            'domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion ) '
-            'VALUES (@id_curso:int4, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, '
-            '@sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, '
-            '@num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id',
+            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento, domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion) '
+            'VALUES (@id_curso:text, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id as id_inserted',
             substitutionValues: {
-              'id_curso': insertedId.single,
+              'id_curso': insertedId.last[0].toString(),
               'nombre': alumno['nombre'],
               'curp': alumno['curp'],
               'matricula': alumno['matricula'],
@@ -524,12 +551,28 @@ Future uploadGrupo(grupo) async {
               'resp_satisfaccion': alumno['resp_satisfaccion'],
               'com_satisfaccion': alumno['com_satisfaccion'],
             });
-        print(result);
       }
     });
+    await removeGrupoQueue(grupo);
   });
 
   connection.close();
+}
+
+Future removeGrupoQueue(grupo) async {
+  var idRegistro = grupo['id_registro'];
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  await database.transaction((txn) async {
+    var result = txn.rawDelete(
+        'DELETE FROM tbl_grupo_temp WHERE id_registro = ${idRegistro}');
+  });
+
+  database.close();
 }
 
 getAlumnos(id_curso) async {
