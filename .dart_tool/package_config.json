@@ -20,6 +20,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "buffer",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/buffer-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "characters",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/characters-1.2.0",
       "packageUri": "lib/",
@@ -80,14 +86,26 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "crypto",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/crypto-3.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "cupertino_icons",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/cupertino_icons-1.0.4",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
+      "name": "date_time_picker",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/date_time_picker-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "dbus",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.1",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.2",
       "packageUri": "lib/",
       "languageVersion": "2.15"
     },
@@ -117,7 +135,7 @@
     },
     {
       "name": "fl_chart",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/fl_chart-0.45.1",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/fl_chart-0.50.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -236,6 +254,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "pedantic",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/pedantic-1.11.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "petitparser",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/petitparser-4.4.0",
       "packageUri": "lib/",
@@ -254,6 +278,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "postgres",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/postgres-2.4.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "process",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/process-4.2.4",
       "packageUri": "lib/",
@@ -262,6 +292,18 @@
     {
       "name": "provider",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/provider-6.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "sasl_scram",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/sasl_scram-0.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "saslprep",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/saslprep-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -357,9 +399,9 @@
     },
     {
       "name": "synchronized",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/synchronized-3.0.0",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/synchronized-3.0.0+2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.14"
     },
     {
       "name": "term_glyph",
@@ -380,6 +422,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "unorm_dart",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/unorm_dart-0.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "vector_math",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/vector_math-2.1.1",
       "packageUri": "lib/",
@@ -387,7 +435,7 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/win32-2.4.1",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/win32-2.5.0",
       "packageUri": "lib/",
       "languageVersion": "2.15"
     },
@@ -410,7 +458,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2022-03-17T21:30:38.480331Z",
+  "generated": "2022-03-28T18:03:29.013333Z",
   "generator": "pub",
-  "generatorVersion": "2.16.1"
+  "generatorVersion": "2.16.2"
 }

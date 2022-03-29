@@ -37,6 +37,8 @@ dependencies:
   intl: ^0.17.0
   sqflite: ^2.0.2
   connectivity_plus: ^2.2.1
+  date_time_picker: ^2.1.0
+  postgres: ^2.4.3
 
 dev_dependencies:
   flutter_test:
