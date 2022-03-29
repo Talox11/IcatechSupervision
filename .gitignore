@@ -18,6 +18,11 @@
 # Visual Studio Code related
 .vscode/
 
+#environment variables file
+.env
+.env.development
+.env.production
+
 # Flutter/Dart/Pub related
 **/doc/api/
 .dart_tool/

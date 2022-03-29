@@ -39,6 +39,7 @@ dependencies:
   connectivity_plus: ^2.2.1
   date_time_picker: ^2.1.0
   postgres: ^2.4.3
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,7 @@ flutter:
     - assets/
     - assets/memoji/
     - assets/cards/
+    - .env
 analyzer:
   exclude:
     - "**/*.g.dart"

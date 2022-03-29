@@ -146,6 +146,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_dotenv",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_dotenv-5.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_lints-1.0.4",
       "packageUri": "lib/",
@@ -458,7 +464,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2022-03-28T18:03:29.013333Z",
+  "generated": "2022-03-29T21:52:47.930439Z",
   "generator": "pub",
   "generatorVersion": "2.16.2"
 }
