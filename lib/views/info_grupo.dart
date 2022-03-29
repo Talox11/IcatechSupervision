@@ -20,6 +20,8 @@ import 'package:postgres/postgres.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../widgets/bottom_nav.dart';
+import 'home.dart';
 import 'info_alumno.dart';
 
 class InfoGrupo extends StatefulWidget {
@@ -266,10 +268,20 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
       checkInternetConnection().then((onValue) async {
         if (onValue) {
           uploadGrupo(infoGrupo, context);
+           Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BottomNav(),
+                ));
         } else {
           showNoInternetConn(context);
           addQueue(infoGrupo);
           print('guardar en cola');
+          Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BottomNav(),
+                ));
         }
       });
     },
