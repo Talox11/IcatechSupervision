@@ -290,7 +290,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 25, 20, 5),
                     child: Text(
                         '¿EL TRAMITE DE INSCRIPCION AL CURSO FUE FACIL?',
                         style: TextStyle(
@@ -299,7 +299,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi1,
@@ -331,7 +331,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿LA CUOTA DE RECUPERACION AL CURSO FUE ACEPTABLE?',
                         style: TextStyle(
@@ -340,7 +340,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi2,
@@ -372,7 +372,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿RECOMENDARIAS A TUS FAMILIARES Y AMIGOS A CAPACITARSE EN EL ICATECH?',
                         style: TextStyle(
@@ -381,7 +381,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi3,
@@ -413,7 +413,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text('¿TE PARECE BIEN LOS CURSOS A DISTANCIA?',
                         style: TextStyle(
                             color: Repository.subTextColor(context)))),
@@ -421,7 +421,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi4,
@@ -453,7 +453,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         'SI EL CURSO FUE PRESENCIAL ¿EL ESPACIO, MOBILIARIO Y MATERIAL UTILIZADO FUE BUENO?',
                         style: TextStyle(
@@ -462,7 +462,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi5,
@@ -494,7 +494,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         'Si el curso fue a distancia ¿La conectividad a internet fue constante sin interrupciones?',
                         style: TextStyle(
@@ -503,7 +503,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi6,
@@ -535,7 +535,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿El tiempo de duración del curso (días), es aceptable?',
                         style: TextStyle(
@@ -544,7 +544,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi7,
@@ -576,7 +576,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text('¿¿El horario diario del curso es aceptable?',
                         style: TextStyle(
                             color: Repository.subTextColor(context)))),
@@ -584,7 +584,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi8,
@@ -616,7 +616,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿Quedaste satisfecho(a) con el contenido del curso?',
                         style: TextStyle(
@@ -625,7 +625,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi9,
@@ -657,7 +657,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿El curso es lo que esperabas, aprendiste suficiente para ponerlo en práctica?',
                         style: TextStyle(
@@ -666,7 +666,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi10,
@@ -698,7 +698,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿El instructor fue claro en la explicación del curso?',
                         style: TextStyle(
@@ -707,7 +707,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi11,
@@ -739,7 +739,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿El material de apoyo del Instructor fue bueno? (presentaciones, videos, audios, etc.?',
                         style: TextStyle(
@@ -748,7 +748,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi12,
@@ -780,7 +780,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 5),
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
                     child: Text(
                         '¿El Instructor motivó a los asistentes a participar en clase, por lo que ésta fue dinámica ? ',
                         style: TextStyle(
@@ -789,7 +789,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                Container(padding: const EdgeInsets.fromLTRB(20, 25, 20, 0)),
+                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi13,

@@ -210,7 +210,7 @@ class _HomeState extends State<Home> {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
         onTap: () async {
-          await checkInternetConnection().then((onValue) async{
+          await checkInternetConnection().then((onValue) async {
             if (onValue) {
               await uploadGrupo(grupo);
               await state.setState(() {
@@ -392,7 +392,7 @@ uploadAllGrupos(state) async {
 
   List gruposList = await database
       .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
-  print(gruposList);
+  
   for (var grupo in gruposList) {
     await uploadGrupo(grupo);
   }
@@ -473,7 +473,7 @@ Future<bool> checkInternetConnection() async {
 Future<bool> verifyIfTableExist(db, tableName) async {
   List row = await db
       .query('sqlite_master', where: 'name = ?', whereArgs: [tableName]);
-  print(row);
+  
   if (row.isEmpty) {
     return false;
   } else {
@@ -571,6 +571,9 @@ Future removeGrupoQueue(grupo) async {
   await database.transaction((txn) async {
     var result = txn.rawDelete(
         'DELETE FROM tbl_grupo_temp WHERE id_registro = ${idRegistro}');
+
+    var result2 = txn.rawDelete(
+        'DELETE FROM alumnos_pre_temp WHERE id_curso = ${idRegistro}');
   });
 
   database.close();

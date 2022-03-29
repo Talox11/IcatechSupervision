@@ -268,20 +268,11 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
       checkInternetConnection().then((onValue) async {
         if (onValue) {
           uploadGrupo(infoGrupo, context);
-           Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BottomNav(),
-                ));
+          showUploadDone(context);
         } else {
           showNoInternetConn(context);
-          addQueue(infoGrupo);
+          addQueue(infoGrupo, context);
           print('guardar en cola');
-          Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BottomNav(),
-                ));
         }
       });
     },
@@ -291,6 +282,38 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
   return widgetInfoGeneral;
 }
 
+showUploadDone(BuildContext context) {
+  // set up the buttons
+
+  Widget continueButton = TextButton(
+    child: const Text('Aceptar'),
+    onPressed: () async {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottomNav(),
+          ));
+    },
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: const Text('Exito'),
+    content: const Text('Se guardo el registro'),
+    actions: [
+      continueButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
 showNoInternetConn(BuildContext context) {
   // set up the buttons
 
@@ -298,6 +321,11 @@ showNoInternetConn(BuildContext context) {
     child: const Text('Aceptar'),
     onPressed: () async {
       Navigator.pop(context);
+      Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BottomNav(),
+      ));
     },
   );
 
@@ -376,7 +404,7 @@ Future<Grupo> getInfoGrupoFromLocalDB(clave) async {
 
     _listAlumnos =
         await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
-        print(_listAlumnos);
+    print(_listAlumnos);
     Grupo grupo = Grupo(
         dataGrupo[0]['id_registro'].toString(),
         dataGrupo[0]['curso'],
@@ -525,7 +553,7 @@ Future<Alumno> getTemporalyAlumnos(idRegistro) async {
   return alumno;
 }
 
-Future addQueue(grupo) async {
+Future addQueue(grupo, context) async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
 
@@ -537,6 +565,8 @@ Future addQueue(grupo) async {
         txn.rawInsert('UPDATE tbl_grupo_temp SET is_editing = 0, is_queue = 1 '
             'WHERE id_registro = ${grupo.id}');
   });
+
+  
 }
 
 showErrorMsg(BuildContext context, msg) {
@@ -617,12 +647,12 @@ Future uploadGrupo(grupo, context) async {
               'domicilio': alumno['domicilio'],
               'estado': alumno['estado'],
               'estado_civil': alumno['estado_civil'],
-              'entidad_nacimiento': alumno['entidad_nacimiento'], 
+              'entidad_nacimiento': alumno['entidad_nacimiento'],
               'seccion_vota': alumno['seccion_vota'],
               'calle': alumno['calle'], //calle
               'num_ext': alumno['numExt'],
               'num_int': alumno['numInt'],
-              'observaciones': alumno['observaciones'],  //observaciones
+              'observaciones': alumno['observaciones'], //observaciones
               'resp_satisfaccion': alumno['resp_satisfaccion'],
               'com_satisfaccion': alumno['com_satisfaccion'],
             });
@@ -646,11 +676,13 @@ Future removeGrupoQueue(grupo) async {
   await database.transaction((txn) async {
     var result = txn.rawDelete(
         'DELETE FROM tbl_grupo_temp WHERE id_registro = ${idRegistro}');
+
+    var result2 = txn.rawDelete(
+        'DELETE FROM alumnos_pre_temp WHERE id_curso = ${idRegistro}');
   });
 
   database.close();
 }
-
 
 getAlumnos(id_curso) async {
   var databasesPath = await getDatabasesPath();
