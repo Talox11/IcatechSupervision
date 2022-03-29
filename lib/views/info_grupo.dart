@@ -15,6 +15,7 @@ import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:flutter_banking_app/widgets/separator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
+import 'package:postgres/postgres.dart';
 //local db
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -102,7 +103,6 @@ class _InfoGrupoState extends State<InfoGrupo> {
           implyLeading: true,
           context: context),
       body: FutureBuilder(
-        
           future: _futureGrupo,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -111,7 +111,6 @@ class _InfoGrupoState extends State<InfoGrupo> {
                 children: _showInfo(snapshot.data, size, context, widget.clave),
               );
             } else if (snapshot.hasError) {
-              
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -175,7 +174,6 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
           const Gap(15)
         ],
       ),
-    
     ),
   );
 
@@ -267,7 +265,7 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
     callback: () {
       checkInternetConnection().then((onValue) async {
         if (onValue) {
-          print('subir datos ' + infoGrupo.id);
+          uploadGrupo(infoGrupo, context);
         } else {
           showNoInternetConn(context);
           addQueue(infoGrupo);
@@ -528,8 +526,6 @@ Future addQueue(grupo) async {
   });
 }
 
-
-
 showErrorMsg(BuildContext context, msg) {
   // set up the buttons
 
@@ -557,4 +553,84 @@ showErrorMsg(BuildContext context, msg) {
       return alert;
     },
   );
+}
+
+Future uploadGrupo(grupo, context) async {
+  // inspect(grupo);
+  var connection = PostgreSQLConnection('10.0.2.2', 5432, 'server_movil',
+      username: 'postgres', password: '8552');
+  await connection.open();
+
+  List<List<dynamic>> results =
+      await connection.query('Select * from public.prueba');
+  var row;
+  await connection.transaction((ctx) async {
+    row = await ctx.query(
+        'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion, depen, tipo_curso ) '
+        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id as id_inserted ',
+        substitutionValues: {
+          'curso': grupo.curso,
+          'cct': grupo.cct,
+          'unidad': grupo.unidad,
+          'clave': grupo.clave,
+          'mod': grupo.mod,
+          'area': grupo.area ?? 'N/A',
+          'espe': grupo.espe,
+          'tcapacitacion': grupo.tcapacitacion,
+          'depen': grupo.depen,
+          'tipo_curso': grupo.tipoCurso,
+        });
+    return row;
+    // );
+  }).then((insertedId) async {
+    await connection.transaction((ctx) async {
+      List alumnos = await getAlumnos(grupo.id);
+
+      for (final alumno in alumnos) {
+        var result = await ctx.query(
+            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento, domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion) '
+            'VALUES (@id_curso:text, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id as id_inserted',
+            substitutionValues: {
+              'id_curso': insertedId.last[0].toString(),
+              'nombre': alumno['nombre'],
+              'curp': alumno['curp'],
+              'matricula': alumno['matricula'],
+              'apellido_paterno': alumno['apellido_paterno'],
+              'apellido_materno': alumno['apellido_materno'],
+              'correo': alumno['correo'],
+              'telefono': alumno['telefono'],
+              'sexo': alumno['sexo'],
+              'fecha_nacimiento': alumno['fecha_nacimiento'],
+              'domicilio': alumno['domicilio'],
+              'estado': alumno['estado'],
+              'estado_civil': alumno['estado_civil'],
+              'entidad_nacimiento': '', //entidad nacimiento,
+              'seccion_vota': alumno['seccion_vota'],
+              'calle': '', //calle
+              'num_ext': alumno['numExt'],
+              'num_int': alumno['numInt'],
+              'observaciones': '', //observaciones
+              'resp_satisfaccion': alumno['resp_satisfaccion'],
+              'com_satisfaccion': alumno['com_satisfaccion'],
+            });
+      }
+    });
+    // await removeGrupoQueue(grupo);
+  });
+
+  connection.close();
+  Navigator.pop(context);
+}
+
+getAlumnos(id_curso) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+  // await deleteDatabase(path);
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+  List alumnos_temp = await database
+      .rawQuery('SELECT * FROM alumnos_pre_temp where id_curso = $id_curso');
+
+  return alumnos_temp;
 }

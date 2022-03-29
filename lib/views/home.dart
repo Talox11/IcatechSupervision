@@ -206,13 +206,13 @@ class _HomeState extends State<Home> {
   List<Widget> createListView(context, dataResponse, size, state) {
     List<Widget> widgetView = [];
 
-    for (var grupos in dataResponse) {
+    for (var grupo in dataResponse) {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
         onTap: () async {
           await checkInternetConnection().then((onValue) {
             if (onValue) {
-              uploadGrupo(grupos);
+              uploadGrupo(grupo);
               state.setState(() {
                 _futureGrupo = getQueueUpload();
               });
@@ -243,7 +243,7 @@ class _HomeState extends State<Home> {
                           Flexible(
                               child: FittedBox(
                                   fit: BoxFit.scaleDown,
-                                  child: Text(grupos['curso'],
+                                  child: Text(grupo['curso'],
                                       maxLines: 1,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -252,7 +252,7 @@ class _HomeState extends State<Home> {
                         ],
                       ),
                       const Gap(24),
-                      customColumn(title: 'grupo', subtitle: grupos['cct']),
+                      customColumn(title: 'grupo', subtitle: grupo['cct']),
                       const Gap(15)
                     ],
                   ),

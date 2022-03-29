@@ -11,6 +11,7 @@ import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/widgets/separator.dart';
 import 'package:gap/gap.dart';
+import 'package:postgres/postgres.dart';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart'; // join()
@@ -823,10 +824,12 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               callback: () {
                 try {
                   if (validateAnswers()) {
-                    updateInfoAlumno();
+                    print('FORM IS valid');
+                    updateInfoAlumno(context);
                   } else {
                     print('no valid form');
-                     DialogBuilder(context).showLoadingIndicator();
+                    showFormNoCompleted(context);
+                    // DialogBuilder(context).showLoadingIndicator();
                   }
                   // Navigator.pop(context);
                 } catch (e) {
@@ -839,7 +842,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
         ));
   }
 
-  void updateInfoAlumno() async {
+  void updateInfoAlumno(context) async {
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'syvic_offline.db');
 
@@ -851,6 +854,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
           'UPDATE alumnos_pre_temp SET seccion_vota = "${_seccionVota.text}", numExt = "${_numExt.text}", numInt = "${_numInt.text}", resp_satisfaccion="${await getRespSatisfaccion()}", com_satisfaccion ="NA"'
           'WHERE id_registro = ${widget.alumno.id}');
     });
+    Navigator.pop(context);
   }
 
   Future<String> getRespSatisfaccion() async {
@@ -927,15 +931,20 @@ class _InfoAlumnoState extends State<InfoAlumno> {
 
   validateAnswers() {
     bool isValid = false;
-
+    bool inputsValid = false;
+    print(_entidadNacimiento.text.isNotEmpty &&
+        _seccionVota.text.isNotEmpty &&
+        _calle.text.isNotEmpty &&
+        _numExt.text.isNotEmpty);
     if (_entidadNacimiento.text.isNotEmpty &&
         _seccionVota.text.isNotEmpty &&
         _calle.text.isNotEmpty &&
         _numExt.text.isNotEmpty) {
-      isValid = true;
+      inputsValid = true;
     } else {
-      isValid = false;
+      inputsValid = false;
     }
+
     if (checkedValueSi1 != checkedValueNo1) {
       isValid = true;
     } else {
@@ -1001,8 +1010,12 @@ class _InfoAlumnoState extends State<InfoAlumno> {
     } else {
       isValid = false;
     }
+    if (isValid && inputsValid) {
+      isValid = true;
+    } else {
+      isValid = false;
+    }
     return isValid;
-    ;
   }
 
   Widget customColumn({required String title, required String subtitle}) {
@@ -1029,98 +1042,138 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   }
 
   setCheckedValues(Alumno alumnoInfo) {
+    //set values from local db
     List valuesChecked = alumnoInfo.respSatisfaccion!.split(',');
     print(valuesChecked);
     if (valuesChecked[0] == 'Si') {
       checkedValueSi1 = true;
       checkedValueNo1 = false;
-    } else {
+    } else if (valuesChecked[0] == 'No') {
       checkedValueSi1 = false;
       checkedValueNo1 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[1] == 'Si') {
       checkedValueSi2 = true;
       checkedValueNo2 = false;
-    } else {
+    } else if (valuesChecked[1] == 'No') {
       checkedValueSi2 = false;
       checkedValueNo2 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[2] == 'Si') {
       checkedValueSi3 = true;
       checkedValueNo3 = false;
-    } else {
+    } else if (valuesChecked[2] == 'No') {
       checkedValueSi3 = false;
       checkedValueNo3 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[3] == 'Si') {
       checkedValueSi4 = true;
       checkedValueNo4 = false;
-    } else {
+    } else if (valuesChecked[3] == 'No') {
       checkedValueSi4 = false;
       checkedValueNo4 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[4] == 'Si') {
       checkedValueSi5 = true;
       checkedValueNo5 = false;
-    } else {
+    } else if (valuesChecked[4] == 'No') {
       checkedValueSi5 = false;
       checkedValueNo5 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[5] == 'Si') {
       checkedValueSi6 = true;
       checkedValueNo6 = false;
-    } else {
+    } else if (valuesChecked[5] == 'No') {
       checkedValueSi6 = false;
       checkedValueNo6 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[6] == 'Si') {
       checkedValueSi7 = true;
       checkedValueNo7 = false;
-    } else {
+    } else if (valuesChecked[6] == 'No') {
       checkedValueSi7 = false;
       checkedValueNo7 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[7] == 'Si') {
       checkedValueSi8 = true;
       checkedValueNo8 = false;
-    } else {
+    } else if (valuesChecked[7] == 'No') {
       checkedValueSi8 = false;
       checkedValueNo8 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[8] == 'Si') {
       checkedValueSi9 = true;
       checkedValueNo9 = false;
-    } else {
+    } else if (valuesChecked[8] == 'No') {
       checkedValueSi9 = false;
       checkedValueNo9 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[9] == 'Si') {
       checkedValueSi10 = true;
       checkedValueNo10 = false;
-    } else {
+    } else if (valuesChecked[9] == 'No') {
       checkedValueSi10 = false;
       checkedValueNo10 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[10] == 'Si') {
       checkedValueSi11 = true;
       checkedValueNo11 = false;
-    } else {
+    } else if (valuesChecked[10] == 'No') {
       checkedValueSi11 = false;
       checkedValueNo11 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[11] == 'Si') {
       checkedValueSi12 = true;
       checkedValueNo12 = false;
-    } else {
+    } else if (valuesChecked[11] == 'No') {
       checkedValueSi12 = false;
       checkedValueNo12 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
     if (valuesChecked[12] == 'Si') {
       checkedValueSi13 = true;
       checkedValueNo13 = false;
-    } else {
+    } else if (valuesChecked[12] == 'No') {
       checkedValueSi13 = false;
       checkedValueNo13 = true;
+    } else {
+      checkedValueSi1 = false;
+      checkedValueNo1 = false;
     }
   }
 
@@ -1151,4 +1204,5 @@ class _InfoAlumnoState extends State<InfoAlumno> {
       },
     );
   }
+
 }
