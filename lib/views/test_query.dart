@@ -180,7 +180,7 @@ void testQuery2() async {
     print(row.values);
   });
   List<Map> grupos =
-      await database.rawQuery('SELECT COUNT (*) FROM tbl_grupo_offline ');
+      await database.rawQuery('SELECT * FROM tbl_grupo_offline ');
   List<Map> inscripcion =
       await database.rawQuery('SELECT COUNT (*) FROM tbl_inscripcion_offline ');
   List<Map> alumnos =
@@ -191,10 +191,8 @@ void testQuery2() async {
   List<Map> inscripcion_temp =
       await database.rawQuery('SELECT COUNT(*) FROM tbl_inscripcion_temp');
   List<Map> alumnos_temp =
-      await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_temp where id_curso = 222260047');
+      await database.rawQuery('SELECT * FROM alumnos_pre_temp ');
 
-        List<Map> queue =
-      await database.rawQuery('SELECT * FROM tbl_queue_grupos');
 
   print('============== grupos');
   for (var item in grupos) {
@@ -209,21 +207,21 @@ void testQuery2() async {
     print(item);
   }
 
-  print('============== grupos_temp');
-  for (var item in grupos_temp) {
-    print(item);
-  }
-  print('============== inscripcion_temp');
-  for (var item in inscripcion_temp) {
-    print(item);
-  }
+  // print('============== grupos_temp');
+  // for (var item in grupos_temp) {
+  //   print(item);
+  // }
+  // print('============== inscripcion_temp');
+  // for (var item in inscripcion_temp) {
+  //   print(item);
+  // }
   print('============== alumnos_temp');
   for (var item in alumnos_temp) {
     print(item);
   }
 
-  print('============== queue');
-  for (var item in queue) {
-    print(item);
-  }
+  // print('============== queue');
+  // for (var item in queue) {
+  //   print(item);
+  // }
 }

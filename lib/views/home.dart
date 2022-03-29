@@ -118,7 +118,7 @@ class _HomeState extends State<Home> {
                       children: [
                         InkWell(
                           onTap: () {
-                            // call this method
+                            // donwload db
                             checkInternetConnection().then((connected) {
                               if (connected) {
                                 showDownloadDBDialog(context);
@@ -140,7 +140,7 @@ class _HomeState extends State<Home> {
                         InkWell(
                           onTap: () async {
                             //update
-                            checkInternetConnection().then((connected) async{
+                            checkInternetConnection().then((connected) async {
                               if (connected) {
                                 await showSyncDialog(context, this);
                                 setState(() {
@@ -186,8 +186,8 @@ class _HomeState extends State<Home> {
                           if (snapshot.hasError) {
                             return Column(
                               children: const [
-                                Icon(Icons.error),
-                                Text('Failed to fetch data.'),
+                                // Icon(Icons.error),
+                                Text('No existen registros.'),
                               ],
                             );
                           } else {
@@ -210,10 +210,10 @@ class _HomeState extends State<Home> {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
         onTap: () async {
-          await checkInternetConnection().then((onValue) {
+          await checkInternetConnection().then((onValue) async{
             if (onValue) {
-              uploadGrupo(grupo);
-              state.setState(() {
+              await uploadGrupo(grupo);
+              await state.setState(() {
                 _futureGrupo = getQueueUpload();
               });
             } else {
@@ -542,12 +542,13 @@ Future uploadGrupo(grupo) async {
               'domicilio': alumno['domicilio'],
               'estado': alumno['estado'],
               'estado_civil': alumno['estado_civil'],
-              'entidad_nacimiento': '', //entidad nacimiento,
+              'entidad_nacimiento':
+                  alumno['entidad_nacimiento'], //entidad nacimiento,
               'seccion_vota': alumno['seccion_vota'],
-              'calle': '', //calle
+              'calle': alumno['calle'], //calle
               'num_ext': alumno['numExt'],
               'num_int': alumno['numInt'],
-              'observaciones': '', //observaciones
+              'observaciones': alumno['observaciones'], //observaciones
               'resp_satisfaccion': alumno['resp_satisfaccion'],
               'com_satisfaccion': alumno['com_satisfaccion'],
             });

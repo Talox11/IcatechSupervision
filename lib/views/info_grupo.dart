@@ -364,6 +364,7 @@ Future<Grupo> getInfoGrupoFromLocalDB(clave) async {
 
     _listAlumnos =
         await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
+        print(_listAlumnos);
     Grupo grupo = Grupo(
         dataGrupo[0]['id_registro'].toString(),
         dataGrupo[0]['curso'],
@@ -604,23 +605,40 @@ Future uploadGrupo(grupo, context) async {
               'domicilio': alumno['domicilio'],
               'estado': alumno['estado'],
               'estado_civil': alumno['estado_civil'],
-              'entidad_nacimiento': '', //entidad nacimiento,
+              'entidad_nacimiento': alumno['entidad_nacimiento'], 
               'seccion_vota': alumno['seccion_vota'],
-              'calle': '', //calle
+              'calle': alumno['calle'], //calle
               'num_ext': alumno['numExt'],
               'num_int': alumno['numInt'],
-              'observaciones': '', //observaciones
+              'observaciones': alumno['observaciones'],  //observaciones
               'resp_satisfaccion': alumno['resp_satisfaccion'],
               'com_satisfaccion': alumno['com_satisfaccion'],
             });
       }
     });
-    // await removeGrupoQueue(grupo);
+    await removeGrupoQueue(grupo);
   });
 
   connection.close();
   Navigator.pop(context);
 }
+
+Future removeGrupoQueue(grupo) async {
+  var idRegistro = grupo['id_registro'];
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  await database.transaction((txn) async {
+    var result = txn.rawDelete(
+        'DELETE FROM tbl_grupo_temp WHERE id_registro = ${idRegistro}');
+  });
+
+  database.close();
+}
+
 
 getAlumnos(id_curso) async {
   var databasesPath = await getDatabasesPath();

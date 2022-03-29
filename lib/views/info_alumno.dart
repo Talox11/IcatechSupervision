@@ -227,7 +227,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
             DefaultTextField(
                 controller: _entidadNacimiento,
                 title: 'Entidad nacimiento',
-                label: widget.alumno.fechaNacimiento,
+                label: 'Introduzca entidad nacimiento',
                 enabled: true,
                 isRequired: true),
             Row(
@@ -251,7 +251,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       label: '###',
                       obscure: true,
                       enabled: true,
-                      isRequired: false),
+                      isRequired: true),
                 ),
                 const Gap(10),
                 Flexible(
@@ -271,7 +271,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                       label: '####',
                       obscure: true,
                       enabled: true,
-                      isRequired: true),
+                      isRequired: false),
                 ),
               ],
             ),
@@ -307,8 +307,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                     setState(() {
                       checkedValueSi1 = newValue!;
                       checkedValueNo1 = !newValue;
-                      print('$newValue');
-                      print('$checkedValueSi1-->$checkedValueNo1');
                     });
                   },
                   controlAffinity:
@@ -824,10 +822,10 @@ class _InfoAlumnoState extends State<InfoAlumno> {
               callback: () {
                 try {
                   if (validateAnswers()) {
-                    print('FORM IS valid');
+                    
                     updateInfoAlumno(context);
                   } else {
-                    print('no valid form');
+                    
                     showFormNoCompleted(context);
                     // DialogBuilder(context).showLoadingIndicator();
                   }
@@ -851,9 +849,16 @@ class _InfoAlumnoState extends State<InfoAlumno> {
     await validateAnswers();
     await database.transaction((txn) async {
       txn.rawInsert(
-          'UPDATE alumnos_pre_temp SET seccion_vota = "${_seccionVota.text}", numExt = "${_numExt.text}", numInt = "${_numInt.text}", resp_satisfaccion="${await getRespSatisfaccion()}", com_satisfaccion ="NA"'
+          'UPDATE alumnos_pre_temp SET entidad_nacimiento = "${_entidadNacimiento.text}", calle = "${_calle.text}", observaciones = "${_observaciones.text}", seccion_vota = "${_seccionVota.text}", numExt = "${_numExt.text}", numInt = "${_numInt.text}", resp_satisfaccion="${await getRespSatisfaccion()}", com_satisfaccion ="NA"'
           'WHERE id_registro = ${widget.alumno.id}');
     });
+    var query = await database.transaction((txn) async {
+      var xd = txn.rawQuery(
+          'SELECT * FROM alumnos_pre_temp WHERE id_registro = ${widget.alumno.id}');
+
+      inspect(xd);
+    });
+
     Navigator.pop(context);
   }
 
@@ -932,10 +937,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   validateAnswers() {
     bool isValid = false;
     bool inputsValid = false;
-    print(_entidadNacimiento.text.isNotEmpty &&
-        _seccionVota.text.isNotEmpty &&
-        _calle.text.isNotEmpty &&
-        _numExt.text.isNotEmpty);
+
     if (_entidadNacimiento.text.isNotEmpty &&
         _seccionVota.text.isNotEmpty &&
         _calle.text.isNotEmpty &&
@@ -1044,7 +1046,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   setCheckedValues(Alumno alumnoInfo) {
     //set values from local db
     List valuesChecked = alumnoInfo.respSatisfaccion!.split(',');
-    print(valuesChecked);
+    
     if (valuesChecked[0] == 'Si') {
       checkedValueSi1 = true;
       checkedValueNo1 = false;
@@ -1204,5 +1206,4 @@ class _InfoAlumnoState extends State<InfoAlumno> {
       },
     );
   }
-
 }
