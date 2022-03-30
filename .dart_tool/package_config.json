@@ -105,7 +105,7 @@
     },
     {
       "name": "dbus",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.2",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.3",
       "packageUri": "lib/",
       "languageVersion": "2.15"
     },
@@ -464,7 +464,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2022-03-29T21:52:47.930439Z",
+  "generated": "2022-03-30T21:19:30.650862Z",
   "generator": "pub",
   "generatorVersion": "2.16.2"
 }

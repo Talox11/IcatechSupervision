@@ -20,6 +20,7 @@ import 'package:postgres/postgres.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../enviroment/enviroment.dart';
 import '../widgets/bottom_nav.dart';
 import 'home.dart';
 import 'info_alumno.dart';
@@ -35,7 +36,7 @@ class InfoGrupo extends StatefulWidget {
 Future<Grupo> _getInfoGrupo(clave) async {
   List _listAlumnos = [];
   final response = await http.post(
-    Uri.parse('http://10.0.2.2:5000/curso/'),
+    Uri.parse(Environment.apiUrl + '/curso/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -118,7 +119,8 @@ class _InfoGrupoState extends State<InfoGrupo> {
                 children: [
                   Text(
                       'Ocurrio un error \n'
-                      ' Al parecer no cuentas con una conexion a internet!',
+                              ' Al parecer no cuentas con una conexion a internet!' +
+                          Environment.fileName,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Styles.icatechPurpleColor.withOpacity(0.7),
@@ -126,6 +128,14 @@ class _InfoGrupoState extends State<InfoGrupo> {
                   const Gap(10),
                   Text(
                       'Intenta descargar la base de datos para entrar en modo offline',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Styles.icatechPurpleColor.withOpacity(0.7),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                  const Gap(30),
+                  Text(
+                      'file'+Environment.fileName+ '   api=> '+Environment.apiUrl,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Styles.icatechPurpleColor.withOpacity(0.7),
@@ -322,10 +332,10 @@ showNoInternetConn(BuildContext context) {
     onPressed: () async {
       Navigator.pop(context);
       Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const BottomNav(),
-      ));
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottomNav(),
+          ));
     },
   );
 
@@ -363,7 +373,7 @@ Widget customColumn({required String title, required String subtitle}) {
 
 Future<List> _getAlumnos(clave) async {
   final response =
-      await http.get(Uri.parse('http://10.0.2.2:5000/curso/$clave'));
+      await http.get(Uri.parse(Environment.apiUrl + '/curso/$clave'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -565,8 +575,6 @@ Future addQueue(grupo, context) async {
         txn.rawInsert('UPDATE tbl_grupo_temp SET is_editing = 0, is_queue = 1 '
             'WHERE id_registro = ${grupo.id}');
   });
-
-  
 }
 
 showErrorMsg(BuildContext context, msg) {

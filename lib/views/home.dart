@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/models/db_helper.dart';
+import 'package:flutter_banking_app/models/db_settings.dart';
 
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
@@ -17,6 +18,10 @@ import 'package:http/http.dart' as http;
 import 'package:postgres/postgres.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
+import '../enviroment/Enviroment.dart';
+
+import 'package:mysql1/mysql1.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -392,7 +397,7 @@ uploadAllGrupos(state) async {
 
   List gruposList = await database
       .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
-  
+
   for (var grupo in gruposList) {
     await uploadGrupo(grupo);
   }
@@ -415,7 +420,8 @@ Future<List> downloadDB() async {
 }
 
 Future<List> _getGrupos() async {
-  final response = await http.get(Uri.parse('http://10.0.2.2:5000/list/grupo'));
+  final response =
+      await http.get(Uri.parse(Environment.apiUrl + '/list/grupo'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -427,7 +433,7 @@ Future<List> _getGrupos() async {
 
 Future<List> _getAlumnosInscritos() async {
   final response =
-      await http.get(Uri.parse('http://10.0.2.2:5000/list/alumnosInscritos'));
+      await http.get(Uri.parse(Environment.apiUrl + '/list/alumnosInscritos'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -439,7 +445,7 @@ Future<List> _getAlumnosInscritos() async {
 
 Future<List> _getAlumnosPre() async {
   final response =
-      await http.get(Uri.parse('http://10.0.2.2:5000/list/alumnosPre'));
+      await http.get(Uri.parse(Environment.apiUrl + '/list/alumnosPre'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -473,7 +479,7 @@ Future<bool> checkInternetConnection() async {
 Future<bool> verifyIfTableExist(db, tableName) async {
   List row = await db
       .query('sqlite_master', where: 'name = ?', whereArgs: [tableName]);
-  
+
   if (row.isEmpty) {
     return false;
   } else {
@@ -495,8 +501,17 @@ Widget customColumn({required String title, required String subtitle}) {
 }
 
 Future uploadGrupo(grupo) async {
-  var connection = PostgreSQLConnection('10.0.2.2', 5432, 'server_movil',
-      username: 'postgres', password: '8552');
+  print('clicked');
+
+  var conn = await MySqlConnection.connect(dbSettings());
+  var dbHost = Environment.dbHost;
+  var dbDatabase = Environment.dbDatabase;
+  var dbPort = int.parse(Environment.dbPort);
+  var dbUsername = Environment.dbUsername;
+  var dbPassword = Environment.dbPassword;
+  
+  var connection = PostgreSQLConnection(dbHost, dbPort, dbDatabase,
+      username: dbUsername, password: dbPassword);
   await connection.open();
 
   List<List<dynamic>> results =

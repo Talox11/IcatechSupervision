@@ -68,7 +68,8 @@ flutter:
     - assets/
     - assets/memoji/
     - assets/cards/
-    - .env
+    - .env.development
+    - .env.production    
 analyzer:
   exclude:
     - "**/*.g.dart"
