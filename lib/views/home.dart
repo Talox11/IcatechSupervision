@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/models/db_helper.dart';
-import 'package:flutter_banking_app/models/db_settings.dart';
+import 'package:flutter_banking_app/models/grupo.dart';
 
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
@@ -20,8 +20,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../enviroment/Enviroment.dart';
-
-import 'package:mysql1/mysql1.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -501,78 +499,27 @@ Widget customColumn({required String title, required String subtitle}) {
 }
 
 Future uploadGrupo(grupo) async {
-  print('clicked');
-
-  var conn = await MySqlConnection.connect(dbSettings());
-  var dbHost = Environment.dbHost;
-  var dbDatabase = Environment.dbDatabase;
-  var dbPort = int.parse(Environment.dbPort);
-  var dbUsername = Environment.dbUsername;
-  var dbPassword = Environment.dbPassword;
+  String grupoAux = jsonEncode(grupo);
+  String listAlumn = await getAlumnos(grupo['id_registro']);
+  var test = jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn});
   
-  var connection = PostgreSQLConnection(dbHost, dbPort, dbDatabase,
-      username: dbUsername, password: dbPassword);
-  await connection.open();
+  final response = await http.post(
+    Uri.parse(Environment.apiUrl + '/grupo/insert'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
+  );
+  inspect(response);
 
-  List<List<dynamic>> results =
-      await connection.query('Select * from public.prueba');
-  var row;
-  await connection.transaction((ctx) async {
-    row = await ctx.query(
-        'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion, depen, tipo_curso ) '
-        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id as id_inserted ',
-        substitutionValues: {
-          'curso': grupo['curso'],
-          'cct': grupo['cct'],
-          'unidad': grupo['unidad'],
-          'clave': grupo['clave'],
-          'mod': grupo['mod'],
-          'area': grupo['area'] ?? 'N/A',
-          'espe': grupo['espe'],
-          'tcapacitacion': grupo['tcapacitacion'],
-          'depen': grupo['depen'],
-          'tipo_curso': grupo['tipo_curso'],
-        });
-    return row;
-    // );
-  }).then((insertedId) async {
-    await connection.transaction((ctx) async {
-      List alumnos = await getAlumnos(grupo['id_registro']);
-
-      for (final alumno in alumnos) {
-        var result = await ctx.query(
-            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento, domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion) '
-            'VALUES (@id_curso:text, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id as id_inserted',
-            substitutionValues: {
-              'id_curso': insertedId.last[0].toString(),
-              'nombre': alumno['nombre'],
-              'curp': alumno['curp'],
-              'matricula': alumno['matricula'],
-              'apellido_paterno': alumno['apellido_paterno'],
-              'apellido_materno': alumno['apellido_materno'],
-              'correo': alumno['correo'],
-              'telefono': alumno['telefono'],
-              'sexo': alumno['sexo'],
-              'fecha_nacimiento': alumno['fecha_nacimiento'],
-              'domicilio': alumno['domicilio'],
-              'estado': alumno['estado'],
-              'estado_civil': alumno['estado_civil'],
-              'entidad_nacimiento':
-                  alumno['entidad_nacimiento'], //entidad nacimiento,
-              'seccion_vota': alumno['seccion_vota'],
-              'calle': alumno['calle'], //calle
-              'num_ext': alumno['numExt'],
-              'num_int': alumno['numInt'],
-              'observaciones': alumno['observaciones'], //observaciones
-              'resp_satisfaccion': alumno['resp_satisfaccion'],
-              'com_satisfaccion': alumno['com_satisfaccion'],
-            });
-      }
-    });
+  if (response.statusCode == 201) {
+    String body = utf8.decode(response.bodyBytes);
+    final jsonData = jsonDecode(body);
+    print(jsonData);
     await removeGrupoQueue(grupo);
-  });
-
-  connection.close();
+  } else {
+    throw Exception('Failed to upload.');
+  }
 }
 
 Future removeGrupoQueue(grupo) async {
@@ -601,8 +548,13 @@ getAlumnos(id_curso) async {
 
   Database database = await openDatabase(path,
       version: 1, onCreate: (Database db, int version) async {});
-  List alumnos_temp = await database
-      .rawQuery('SELECT * FROM alumnos_pre_temp where id_curso = $id_curso');
-
-  return alumnos_temp;
+  List alumnos_temp =
+      await database.query('alumnos_pre_temp where id_curso = $id_curso');
+  String aux = jsonEncode(alumnos_temp);
+  // print(aux);
+  // inspect(alumnos_temp[2].row);
+  // for (var alumno in alumnos_temp) {
+  //   print(alumno.row);
+  // }
+  return jsonEncode(alumnos_temp).toString();
 }

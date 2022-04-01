@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_banking_app/enviroment/enviroment.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/layouts.dart';
 
@@ -12,6 +15,8 @@ import 'package:gap/gap.dart';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
+import 'package:http/http.dart' as http;
 
 class TestQuery extends StatefulWidget {
   const TestQuery({Key? key}) : super(key: key);
@@ -168,6 +173,18 @@ void testQuery() async {
 }
 
 void testQuery2() async {
+  print('query test');
+  final response = await http.get(Uri.parse(Environment.apiUrl + '/prueba'));
+  if (response.statusCode == 200) {
+    String body = utf8.decode(response.bodyBytes);
+    print(body);
+    return jsonDecode(body);
+  } else {
+    throw Exception('Failed to create album.');
+  }
+}
+
+printlocaldb() async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
   // await deleteDatabase(path);
@@ -193,19 +210,18 @@ void testQuery2() async {
   List<Map> alumnos_temp =
       await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_temp ');
 
-
-  // print('============== grupos');
-  // for (var item in grupos) {
-  //   print(item);
-  // }
-  // print('============== inscritor');
-  // for (var item in inscripcion) {
-  //   print(item);
-  // }
-  // print('============== alumnos');
-  // for (var item in alumnos) {
-  //   print(item);
-  // }
+  print('============== grupos');
+  for (var item in grupos) {
+    print(item);
+  }
+  print('============== inscritor');
+  for (var item in inscripcion) {
+    print(item);
+  }
+  print('============== alumnos');
+  for (var item in alumnos) {
+    print(item);
+  }
 
   print('============== grupos_temp');
   for (var item in grupos_temp) {
@@ -219,9 +235,4 @@ void testQuery2() async {
   for (var item in alumnos_temp) {
     print(item);
   }
-
-  // print('============== queue');
-  // for (var item in queue) {
-  //   print(item);
-  // }
 }

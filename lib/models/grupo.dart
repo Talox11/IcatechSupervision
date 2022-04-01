@@ -54,19 +54,5 @@ class Grupo {
     }
   }
 
-  // Map toJson() => {
-  //     'id_registro':id,
-  //     'curso':curso,
-  //     'cct':cct,
-  //     'unidad':unidad,
-  //     'clave':clave,
-  //     'mod':mod,
-  //     'inicio':inicio,
-  //     'termino':termino,
-  //     'area':area,
-  //     'espe':espe,
-  //     'tcapacitacion':tcapacitacion,
-  //     'depen':depen,
-  //     'tipoCurso':tipoCurso,
-  //   };
+ 
 }

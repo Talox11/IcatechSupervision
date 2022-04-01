@@ -188,53 +188,6 @@ Future helperCreateTables() async {
 
   Database database = await openDatabase(path, version: 1,
       onCreate: (Database db, int version) async {
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_offline (
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          curso TEXT,
-          cct TEXT,
-          unidad TEXT,
-          clave TEXT,
-          mod TEXT,
-          inicio DATE,
-          termino DATE,
-          area TEXT,
-          espe TEXT,
-          tcapacitacion TEXT,
-          depen TEXT,
-          tipo_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_offline(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          matricula TEXT,
-          nombre TEXT,
-          curp TEXT,
-          id_curso TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
-
-    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_offline(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          id_registro INTEGER,
-          nombre TEXT,
-          apellido_paterno TEXT,
-          apellido_materno TEXT,
-          correo TEXT,
-          telefono TEXT,
-          curp TEXT,
-          sexo TEXT,
-          fecha_nacimiento TEXT,
-          domicilio TEXT,
-          colonia TEXT,
-          municipio TEXT,
-          estado TEXT,
-          estado_civil TEXT,
-          matricula TEXT,
-          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''');
 
     await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_temp(
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

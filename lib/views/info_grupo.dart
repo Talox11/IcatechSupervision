@@ -35,6 +35,7 @@ class InfoGrupo extends StatefulWidget {
 
 Future<Grupo> _getInfoGrupo(clave) async {
   List _listAlumnos = [];
+  
   final response = await http.post(
     Uri.parse(Environment.apiUrl + '/curso/'),
     headers: <String, String>{
@@ -42,7 +43,7 @@ Future<Grupo> _getInfoGrupo(clave) async {
     },
     body: jsonEncode(<String, String>{'clave': clave}),
   );
-
+  inspect(response);
   if (response.statusCode == 201) {
     String body = utf8.decode(response.bodyBytes);
     final jsonData = jsonDecode(body);
@@ -68,7 +69,9 @@ Future<Grupo> _getInfoGrupo(clave) async {
     saveTemporaly(grupo);
     return grupo;
   } else {
-    throw Exception('Failed to create album.');
+    // statusCode = response.statusCode.toString();
+    throw Exception(
+        'Failed to create album.: ' + response.statusCode.toString());
   }
 }
 
@@ -76,6 +79,8 @@ class _InfoGrupoState extends State<InfoGrupo> {
   // connectivity var
 
   Future<Grupo>? _futureGrupo;
+
+  
 
   @override
   void initState() {
@@ -120,7 +125,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
                   Text(
                       'Ocurrio un error \n'
                               ' Al parecer no cuentas con una conexion a internet!' +
-                          Environment.fileName,
+                          Environment.fileName+'',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Styles.icatechPurpleColor.withOpacity(0.7),
@@ -135,7 +140,10 @@ class _InfoGrupoState extends State<InfoGrupo> {
                           fontWeight: FontWeight.bold)),
                   const Gap(30),
                   Text(
-                      'file'+Environment.fileName+ '   api=> '+Environment.apiUrl,
+                      'file' +
+                          Environment.fileName +
+                          '   api=> ' +
+                          Environment.apiUrl,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Styles.icatechPurpleColor.withOpacity(0.7),
@@ -155,7 +163,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
 List<Widget> _showInfo(dataResponse, size, context, clave) {
   List<Widget> widgetInfoGeneral = [];
   Grupo infoGrupo = dataResponse;
-
+  inspect(infoGrupo);
   widgetInfoGeneral.add(
     Container(
       width: double.infinity,
@@ -607,70 +615,27 @@ showErrorMsg(BuildContext context, msg) {
 }
 
 Future uploadGrupo(grupo, context) async {
-  // inspect(grupo);
-  var connection = PostgreSQLConnection('10.0.2.2', 5432, 'server_movil',
-      username: 'postgres', password: '8552');
-  await connection.open();
+  String grupoAux = jsonEncode(grupo);
+  String listAlumn = await getAlumnos(grupo['id_registro']);
 
-  List<List<dynamic>> results =
-      await connection.query('Select * from public.prueba');
-  var row;
-  await connection.transaction((ctx) async {
-    row = await ctx.query(
-        'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion, depen, tipo_curso ) '
-        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id as id_inserted ',
-        substitutionValues: {
-          'curso': grupo.curso,
-          'cct': grupo.cct,
-          'unidad': grupo.unidad,
-          'clave': grupo.clave,
-          'mod': grupo.mod,
-          'area': grupo.area ?? 'N/A',
-          'espe': grupo.espe,
-          'tcapacitacion': grupo.tcapacitacion,
-          'depen': grupo.depen,
-          'tipo_curso': grupo.tipoCurso,
-        });
-    return row;
-    // );
-  }).then((insertedId) async {
-    await connection.transaction((ctx) async {
-      List alumnos = await getAlumnos(grupo.id);
+  final response = await http.post(
+    Uri.parse(Environment.apiUrl + '/grupo/insert'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
+  );
+  inspect(response);
 
-      for (final alumno in alumnos) {
-        var result = await ctx.query(
-            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento, domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion) '
-            'VALUES (@id_curso:text, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id as id_inserted',
-            substitutionValues: {
-              'id_curso': insertedId.last[0].toString(),
-              'nombre': alumno['nombre'],
-              'curp': alumno['curp'],
-              'matricula': alumno['matricula'],
-              'apellido_paterno': alumno['apellido_paterno'],
-              'apellido_materno': alumno['apellido_materno'],
-              'correo': alumno['correo'],
-              'telefono': alumno['telefono'],
-              'sexo': alumno['sexo'],
-              'fecha_nacimiento': alumno['fecha_nacimiento'],
-              'domicilio': alumno['domicilio'],
-              'estado': alumno['estado'],
-              'estado_civil': alumno['estado_civil'],
-              'entidad_nacimiento': alumno['entidad_nacimiento'],
-              'seccion_vota': alumno['seccion_vota'],
-              'calle': alumno['calle'], //calle
-              'num_ext': alumno['numExt'],
-              'num_int': alumno['numInt'],
-              'observaciones': alumno['observaciones'], //observaciones
-              'resp_satisfaccion': alumno['resp_satisfaccion'],
-              'com_satisfaccion': alumno['com_satisfaccion'],
-            });
-      }
-    });
+  if (response.statusCode == 201) {
+    String body = utf8.decode(response.bodyBytes);
+    final jsonData = jsonDecode(body);
+    print(jsonData);
     await removeGrupoQueue(grupo);
-  });
-
-  connection.close();
-  Navigator.pop(context);
+    Navigator.pop(context);
+  } else {
+    throw Exception('Failed to upload.');
+  }
 }
 
 Future removeGrupoQueue(grupo) async {
