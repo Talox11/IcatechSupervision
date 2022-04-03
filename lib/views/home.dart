@@ -119,27 +119,7 @@ class _HomeState extends State<Home> {
                       //iconos tab
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
-                          onTap: () {
-                            // donwload db
-                            checkInternetConnection().then((connected) {
-                              if (connected) {
-                                showDownloadDBDialog(context);
-                              } else {
-                                showNoInternetConn(context);
-                              }
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF026EF4).withOpacity(0.15),
-                            ),
-                            child: const Icon(IconlyBold.Download,
-                                color: Color(0xFF026EF4)),
-                          ),
-                        ),
+                        
                         InkWell(
                           onTap: () async {
                             //update
@@ -270,55 +250,7 @@ class _HomeState extends State<Home> {
     return widgetView;
   }
 
-  showDownloadDBDialog(BuildContext context) {
-    // set up the buttons
-    Widget cancelButton = TextButton(
-      child: const Text('Cancelar'),
-      onPressed: () {
-        Navigator.pop(context);
-      },
-    );
-    Widget continueButton = TextButton(
-      child: const Text('Continuar'),
-      onPressed: () async {
-        bool connectivityExist = false;
-        await checkInternetConnection().then((onValue) {
-          connectivityExist = onValue;
-          print('On connectivityExist =  $connectivityExist');
-        });
 
-        if (connectivityExist) {
-          print('downloading');
-          DialogBuilder(context).showLoadingIndicator();
-          await downloadDB();
-          Navigator.pop(context);
-          DialogBuilder(context).hideOpenDialog();
-        } else {
-          print('No hay conexion');
-        }
-      },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: const Text('Atencion'),
-      content: const Text(
-          'Descargar la base de datos te permitirá usar la aplicación sin conexión a internet,'
-          ' pero consumirá parte de tu almacenamiento interno, ¿deseas continuar?'),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
 
   showNoInternetConn(BuildContext context) {
     // set up the buttons
@@ -401,21 +333,7 @@ uploadAllGrupos(state) async {
   }
 }
 
-Future<List> downloadDB() async {
-  late List _listGrupos = [];
-  late List _listAlumnosInscritos = [];
-  late List _listAlumnosPre = [];
-  // saveDB(jsonData);
-  print('dowloading ');
-  _listGrupos = await _getGrupos();
-  _listAlumnosInscritos = await _getAlumnosInscritos();
-  _listAlumnosPre = await _getAlumnosPre();
 
-  await saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
-  return [
-    {'done'}
-  ];
-}
 
 Future<List> _getGrupos() async {
   final response =
@@ -453,12 +371,6 @@ Future<List> _getAlumnosPre() async {
   }
 }
 
-Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
-  await dowloadDB(grupos, alumnosIns, alumnosPre);
-  return [
-    {'done'}
-  ];
-}
 
 Future createTables() async {
   helperCreateTables();

@@ -36,18 +36,12 @@ class _WalletState extends State<Wallet> {
   }
 
   Future<List> getSaved() async {
-    print('lists saved');
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'syvic_offline.db');
-
     Database database = await openDatabase(path,
         version: 1, onCreate: (Database db, int version) async {});
-
     List row = await database
         .rawQuery('SELECT * FROM tbl_grupo_temp where is_editing = 1');
-    for (var item in row) {
-      print(item);
-    }
     return Future.value(row);
   }
 
@@ -131,71 +125,69 @@ class _WalletState extends State<Wallet> {
       ),
     );
   }
-}
 
-List<Widget> createListView(context, dataResponse, size, state) {
-  List<Widget> widgetView = [];
-  print('creating view');
-  widgetView.add(
-      separatorText(context: context, text: 'Vistos recientemente'));
-  for (var grupo in dataResponse) {
+  List<Widget> createListView(context, dataResponse, size, state) {
+    List<Widget> widgetView = [];
 
-    widgetView.add(const Gap(15));
-    widgetView.add(InkWell(
-      onTap: () async {
-        print('clicked');
-        
-        Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              InfoGrupo(clave: grupo['clave']),
-                        ));
-      },
-      child: FittedBox(
-        child: SizedBox(
-          height: size.height * 0.15,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: size.width,
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Repository.headerColor2(context),
+    widgetView
+        .add(separatorText(context: context, text: 'Vistos recientemente'));
+    for (var grupo in dataResponse) {
+      widgetView.add(const Gap(15));
+      widgetView.add(InkWell(
+        onTap: ()  {
+          
+          _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+           Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InfoGrupo(clave: grupo['clave']),
+              ));
+        },
+        child: FittedBox(
+          child: SizedBox(
+            height: size.height * 0.15,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: size.width,
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Repository.headerColor2(context),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Flexible(
+                              child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(grupo['curso'],
+                                      maxLines: 1,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 21,
+                                          color: Colors.white)))),
+                        ],
+                      ),
+                      const Gap(24),
+                      customColumn(title: 'Clave', subtitle: grupo['clave']),
+                      const Gap(15)
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Flexible(
-                            child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(grupo['curso'],
-                                    maxLines: 1,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 21,
-                                        color: Colors.white)))),
-                      ],
-                    ),
-                    const Gap(24),
-                    customColumn(title: 'Clave', subtitle: grupo['clave']),
-                    const Gap(15)
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    ));
-  }
+      ));
+    }
 
-  return widgetView;
+    return widgetView;
+  }
 }
 
 Widget customColumn({required String title, required String subtitle}) {

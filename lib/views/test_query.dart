@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -93,7 +94,7 @@ class _TestQueryState extends State<TestQuery> {
               children: [
                 InkWell(
                   onTap: () {
-                    print('hacer query');
+                    testQuery();
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -134,54 +135,112 @@ class _TestQueryState extends State<TestQuery> {
 }
 
 void checkInternetConnection() async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.mobile) {
-    print('connected to internet mobile');
-  } else if (connectivityResult == ConnectivityResult.wifi) {
-    print('connected to internet wifi');
-    // I am connected to a wifi network.
-  } else {
-    print('no connection to internet');
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      print('connected');
+    }
+  } on SocketException catch (_) {
+    print('not connected');
   }
 }
 
 void testQuery() async {
   var databasesPath = await getDatabasesPath();
-  String path = join(databasesPath, 'demo.db');
+  String path = join(databasesPath, 'syvic_offline.db');
 
 // open the database
 
-  Database database = await openDatabase(path, version: 1,
-      onCreate: (Database db, int version) async {
-    // When creating the db, create the table
-    await db.execute(
-        'CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT, value INTEGER, num REAL)');
-  });
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
 
-  await database.transaction((txn) async {
-    int id1 = await txn.rawInsert(
-        'INSERT INTO Test(name, value, num) VALUES("some name", 1234, 456.789)');
-    print('inserted1: $id1');
-    int id2 = await txn.rawInsert(
-        'INSERT INTO Test(name, value, num) VALUES(?, ?, ?)',
-        ['another name', 12345678, 3.1416]);
-    print('inserted2: $id2');
-  });
-
-  List<Map> list = await database.rawQuery('SELECT * FROM Test');
+  List<Map> list = await database.rawQuery('SELECT * FROM alumnos_pre_temp');
   print(list);
 }
 
 void testQuery2() async {
-  print('query test');
-  final response = await http.get(Uri.parse(Environment.apiUrl + '/prueba'));
-  if (response.statusCode == 200) {
-    String body = utf8.decode(response.bodyBytes);
-    print(body);
-    return jsonDecode(body);
-  } else {
-    throw Exception('Failed to create album.');
-  }
+  // print('query test');
+  // final response = await http.get(Uri.parse(Environment.apiUrl + '/prueba'));
+  // if (response.statusCode == 200) {
+  //   String body = utf8.decode(response.bodyBytes);
+  //   print(body);
+  //   return jsonDecode(body);
+  // } else {
+  //   throw Exception('Failed to create album.');
+  // }
+  dropAndCreate();
+}
+
+void dropAndCreate() async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+  await deleteDatabase(path);
+  Database database = await openDatabase(path, version: 1,
+      onCreate: (Database db, int version) async {
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_grupo_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          curso TEXT,
+          cct TEXT,
+          unidad TEXT,
+          clave TEXT,
+          mod TEXT,
+          inicio DATE,
+          termino DATE,
+          area TEXT,
+          espe TEXT,
+          tcapacitacion TEXT,
+          depen TEXT,
+          tipo_curso TEXT,
+          is_editing INTEGER,
+          is_queue INTEGER
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS tbl_inscripcion_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          matricula TEXT,
+          nombre TEXT,
+          curp TEXT,
+          id_curso TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    await db.execute('''CREATE TABLE IF NOT EXISTS alumnos_pre_temp(
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          id_registro INTEGER,
+          id_curso INTEGER,
+          nombre TEXT,
+          apellido_paterno TEXT,
+          apellido_materno TEXT,
+          correo TEXT,
+          telefono TEXT,
+          curp TEXT,
+          sexo TEXT,
+          fecha_nacimiento TEXT,
+          domicilio TEXT,
+          colonia TEXT,
+          municipio TEXT,
+          estado TEXT,
+          estado_civil TEXT,
+          matricula TEXT,
+          entidad_nacimiento TEXT,
+          observaciones TEXT,
+          calle TEXT,
+          seccion_vota TEXT,
+          numExt TEXT,
+          numInt TEXT,
+          resp_satisfaccion TEXT,
+          com_satisfaccion TEXT,
+          createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )''');
+
+    (await db.query('sqlite_master', columns: ['type', 'name'])).forEach((row) {
+      print(row.values);
+    });
+  });
+  printlocaldb();
 }
 
 printlocaldb() async {
@@ -196,32 +255,12 @@ printlocaldb() async {
       .forEach((row) {
     print(row.values);
   });
-  List<Map> grupos =
-      await database.rawQuery('SELECT * FROM tbl_grupo_offline ');
-  List<Map> inscripcion =
-      await database.rawQuery('SELECT COUNT (*) FROM tbl_inscripcion_offline ');
-  List<Map> alumnos =
-      await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_offline');
-
   List<Map> grupos_temp =
       await database.rawQuery('SELECT COUNT(*) FROM tbl_grupo_temp');
   List<Map> inscripcion_temp =
       await database.rawQuery('SELECT COUNT(*) FROM tbl_inscripcion_temp');
   List<Map> alumnos_temp =
       await database.rawQuery('SELECT COUNT(*) FROM alumnos_pre_temp ');
-
-  print('============== grupos');
-  for (var item in grupos) {
-    print(item);
-  }
-  print('============== inscritor');
-  for (var item in inscripcion) {
-    print(item);
-  }
-  print('============== alumnos');
-  for (var item in alumnos) {
-    print(item);
-  }
 
   print('============== grupos_temp');
   for (var item in grupos_temp) {
