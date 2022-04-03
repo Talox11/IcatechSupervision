@@ -59,7 +59,7 @@ class Grupo {
   addAlumos2(response) {
     for (var item in response) {
       Alumno alu = Alumno(
-        item['id'].toString(),
+        item['id_registro'].toString(),
         item['id_curso'].toString(),
         item['nombre'],
         item['apellido_paterno'],

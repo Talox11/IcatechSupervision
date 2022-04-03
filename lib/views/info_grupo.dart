@@ -85,34 +85,28 @@ class _InfoGrupoState extends State<InfoGrupo> {
 
   @override
   void initState() {
-    // try {
-    //   tempRecordExist('tbl_grupo_temp', 'clave', widget.clave)
-    //       .then((exist) async {
-    //     if (exist) {
-    //       print('registro almacenado localmente');
-    //       //si existe localmente obtiene datos
-    //       _futureGrupo = getGrupoFromLocalDB(widget.clave);
-    //     } else {
-    //       // si no existe, hace peticion al servidor
-    //       print('registro nuevo');
-    //       checkInternetConn().then((connectivityExist) {
-    //         if (connectivityExist) {
-    //           _futureGrupo = _getInfoGrupo(widget.clave);
-    //         } else {
-    //           _futureGrupo = null;
-    //         }
-    //       });
-    //     }
-    //   });
-    // } catch (e) {
-    //   print(e);
-    // }
-
-    List list1 = [1, 2, 3];
-    List list2 = [4, 5, 6];
-
-    var newList = [list1, list2].expand((x) => x).toList();
-    print(newList);
+    try {
+      tempRecordExist('tbl_grupo_temp', 'clave', widget.clave)
+          .then((exist) async {
+        if (exist) {
+          print('registro almacenado localmente');
+          //si existe localmente obtiene datos
+          _futureGrupo = getGrupoFromLocalDB(widget.clave);
+        } else {
+          // si no existe, hace peticion al servidor
+          print('registro nuevo');
+          checkInternetConn().then((connectivityExist) {
+            if (connectivityExist) {
+              _futureGrupo = _getInfoGrupo(widget.clave);
+            } else {
+              _futureGrupo = null;
+            }
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+    }
 
     super.initState();
   }
@@ -240,21 +234,21 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
   // print(infoGrupo.alumnos);
 
   List<Alumno> alumnos = infoGrupo.alumnos;
+  inspect(alumnos);
   for (Alumno alumno in alumnos) {
-    // print(item);
     widgetInfoGeneral.add(
       InkWell(
         onTap: () {
           Alumno fAlumno;
-          // getTemporalyAlumnos(alumno.id).then((rAlumno) {
-          //   fAlumno = rAlumno;
-          //   Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) =>
-          //             InfoAlumno(alumno: rAlumno, clave: clave),
-          //       ));
-          // });
+          getTemporalyAlumnos(alumno.id).then((rAlumno) {
+            fAlumno = rAlumno;
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      InfoAlumno(alumno: rAlumno, clave: clave),
+                ));
+          });
         },
         child: FittedBox(
           child: SizedBox(
@@ -320,16 +314,16 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
     color: Repository.selectedItemColor(context),
     context: context,
     callback: () {
-      // checkInternetConnection().then((onValue) async {
-      //   if (onValue) {
-      //     uploadGrupo(infoGrupo, context);
-      //     showUploadDone(context);
-      //   } else {
-      //     showNoInternetConn(context);
-      //     addQueue(infoGrupo, context);
-      //     print('guardar en cola');
-      //   }
-      // });
+      checkInternetConn().then((connectivityExist) async {
+        if (connectivityExist) {
+          uploadGrupo(infoGrupo, context);
+          showUploadDone(context);
+        } else {
+          showNoInternetConn(context);
+          addQueue(infoGrupo, context);
+          print('guardar en cola');
+        }
+      });
     },
     text: 'Finalizar',
   ));
@@ -447,29 +441,30 @@ Future<Grupo> getGrupoFromLocalDB(clave) async {
     List dataGrupo =
         await database.query(dbTable, where: 'clave = ?', whereArgs: [clave]);
 
-    _listAlumnos = [];
-    // await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
+    List _listAlumnos =
+        await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
 
     // inspect(_listAlumnos[0]);
     Grupo grupo = Grupo(
-        dataGrupo[0]['id_registro'],
-        dataGrupo[0]['curso'],
-        dataGrupo[0]['cct'],
-        dataGrupo[0]['unidad'],
-        dataGrupo[0]['clave'],
-        dataGrupo[0]['mod'],
-        dataGrupo[0]['inicio'],
-        dataGrupo[0]['termino'],
-        dataGrupo[0]['area'],
-        dataGrupo[0]['espe'],
-        dataGrupo[0]['tcapacitacion'],
-        dataGrupo[0]['depen'],
-        dataGrupo[0]['tipo_curso']);
+      dataGrupo[0]['id_registro'].toString(),
+      dataGrupo[0]['curso'],
+      dataGrupo[0]['cct'],
+      dataGrupo[0]['unidad'],
+      dataGrupo[0]['clave'],
+      dataGrupo[0]['mod'],
+      dataGrupo[0]['inicio'],
+      dataGrupo[0]['termino'],
+      dataGrupo[0]['area'],
+      dataGrupo[0]['espe'],
+      dataGrupo[0]['tcapacitacion'],
+      dataGrupo[0]['depen'],
+      dataGrupo[0]['tipo_curso'],
+    );
     // grupo.isEditing = int.parse(dataGrupo[0]['is_editing']);
     // grupo.isQueue = int.parse(dataGrupo[0]['is_queue']);
 
-    print(grupo);
-    // await grupo.addAlumos2(_listAlumnos);
+    await grupo.addAlumos2(_listAlumnos);
+    inspect(grupo);
     return grupo;
   } catch (e) {
     rethrow;
@@ -483,6 +478,154 @@ Future<List> _getAlumnosFromLocalDB(idCurso, database) async {
 
   return dataAlumnos;
 }
+
+Future<Alumno> getTemporalyAlumnos(idRegistro) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  List row = await database.query('alumnos_pre_temp',
+      where: 'id_registro = ?', whereArgs: [idRegistro]);
+  // print(idRegistro+'  497row__'+row.toString());
+  Alumno alumno = Alumno(
+    row[0]['id_registro'].toString(),
+    row[0]['id_curso'].toString(),
+    row[0]['nombre'],
+    row[0]['apellido_paterno'],
+    row[0]['apellido_materno'],
+    row[0]['correo'],
+    row[0]['telefono'],
+    row[0]['curp'],
+    row[0]['sexo'],
+    row[0]['fecha_nacimiento'],
+    row[0]['domicilio'],
+    row[0]['colonia'],
+    row[0]['municipio'],
+    row[0]['estado'],
+    row[0]['estado_civil'],
+    row[0]['matricula'],
+  );
+
+  alumno.addNewInfo(
+      row[0]['estado'],
+      row[0]['observaciones'],
+      row[0]['calle'],
+      row[0]['seccion_vota'],
+      row[0]['numExt'],
+      row[0]['numInt'],
+      row[0]['resp_satisfaccion'],
+      row[0]['com_satisfaccion']);
+
+  database.close();
+  return alumno;
+}
+
+Future uploadGrupo(grupo, context) async {
+  String grupoAux = jsonEncode(grupo);
+  String listAlumn = await getAlumnos(grupo['id_registro']);
+
+  final response = await http.post(
+    Uri.parse(Environment.apiUrl + '/grupo/insert'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
+  );
+
+  if (response.statusCode == 201) {
+    String body = utf8.decode(response.bodyBytes);
+    final jsonData = jsonDecode(body);
+    print(jsonData);
+    await removeGrupoQueue(grupo);
+    Navigator.pop(context);
+  } else {
+    throw Exception('Failed to upload.');
+  }
+}
+
+Future addQueue(grupo, context) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  await database.transaction((txn) async {
+    var result =
+        txn.rawInsert('UPDATE tbl_grupo_temp SET is_editing = 0, is_queue = 1 '
+            'WHERE id_registro = ${grupo.id}');
+  });
+}
+
+showUploadDone(BuildContext context) {
+  // set up the buttons
+
+  Widget continueButton = TextButton(
+    child: const Text('Aceptar'),
+    onPressed: () async {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottomNav(),
+          ));
+    },
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: const Text('Exito'),
+    content: const Text('Se guardo el registro'),
+    actions: [
+      continueButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
+showNoInternetConn(BuildContext context) {
+  // set up the buttons
+
+  Widget continueButton = TextButton(
+    child: const Text('Aceptar'),
+    onPressed: () async {
+      Navigator.pop(context);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottomNav(),
+          ));
+    },
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: const Text('Error'),
+    content: const Text(
+        'No cuentas con una conexion a internet, se reanudará la subida cuando te conectes de nuevo'),
+    actions: [
+      continueButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
+
 
 checkInternetConn() async {
   try {

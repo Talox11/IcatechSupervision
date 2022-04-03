@@ -34,39 +34,14 @@ class _TestQueryState extends State<TestQuery> {
   void initState() {
     super.initState();
     // _getInfoGrupo();
-    checkInternetConnection();
+    
 
-    initConnectivity();
-    _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+
     // testQuery();
   }
 
-  Future<void> initConnectivity() async {
-    late ConnectivityResult result;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      result = await _connectivity.checkConnectivity();
-    } on PlatformException catch (e) {
-      print('Couldn\'t check connectivity status $e');
-      return;
-    }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) {
-      return Future.value(null);
-    }
 
-    return _updateConnectionStatus(result);
-  }
-
-  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() {
-      _connectionStatus = result;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,16 +109,6 @@ class _TestQueryState extends State<TestQuery> {
   }
 }
 
-void checkInternetConnection() async {
-  try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-      print('connected');
-    }
-  } on SocketException catch (_) {
-    print('not connected');
-  }
-}
 
 void testQuery() async {
   var databasesPath = await getDatabasesPath();
