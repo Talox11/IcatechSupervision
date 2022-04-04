@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class _HomeState extends State<Home> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hola verificador',
+                        Text('Hola verificador' + Environment.fileName,
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 16)),
@@ -119,11 +120,10 @@ class _HomeState extends State<Home> {
                       //iconos tab
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        
                         InkWell(
                           onTap: () async {
                             //update
-                            checkInternetConnection().then((connected) async {
+                            checkInternetConn().then((connected) async {
                               if (connected) {
                                 await showSyncDialog(context, this);
                                 setState(() {
@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
         onTap: () async {
-          await checkInternetConnection().then((onValue) async {
+          await checkInternetConn().then((onValue) async {
             if (onValue) {
               await uploadGrupo(grupo);
               await state.setState(() {
@@ -249,8 +249,6 @@ class _HomeState extends State<Home> {
 
     return widgetView;
   }
-
-
 
   showNoInternetConn(BuildContext context) {
     // set up the buttons
@@ -333,8 +331,6 @@ uploadAllGrupos(state) async {
   }
 }
 
-
-
 Future<List> _getGrupos() async {
   final response =
       await http.get(Uri.parse(Environment.apiUrl + '/list/grupo'));
@@ -371,20 +367,39 @@ Future<List> _getAlumnosPre() async {
   }
 }
 
-
 Future createTables() async {
   helperCreateTables();
 }
 
-Future<bool> checkInternetConnection() async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.mobile ||
-      connectivityResult == ConnectivityResult.wifi) {
-    return true;
-  } else {
+Future<bool> checkInternetConn() async {
+  try {
+    final result = await InternetAddress.lookup('google.com.mx');
+    print(result);
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      print('connected');
+      return true;
+    }else{
+      return false;
+    }
+  } on SocketException catch (_) {
+    print('not connected');
     return false;
   }
 }
+
+//   checkInternetConn() async {
+//   try {
+//     final result = await InternetAddress.lookup('https://icatech-mobile.herokuapp.com/');
+//     print(result);
+//     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+//       print('connected');
+//       return true;
+//     }
+//   } on SocketException catch (_) {
+//     print('not connected');
+//     return false;
+//   }
+// }
 
 Future<bool> verifyIfTableExist(db, tableName) async {
   List row = await db
@@ -413,8 +428,9 @@ Widget customColumn({required String title, required String subtitle}) {
 Future uploadGrupo(grupo) async {
   String grupoAux = jsonEncode(grupo);
   String listAlumn = await getAlumnos(grupo['id_registro']);
-  var test = jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn});
-  
+  var test =
+      jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn});
+
   final response = await http.post(
     Uri.parse(Environment.apiUrl + '/grupo/insert'),
     headers: <String, String>{
@@ -428,7 +444,7 @@ Future uploadGrupo(grupo) async {
     String body = utf8.decode(response.bodyBytes);
     final jsonData = jsonDecode(body);
     print(jsonData);
-    await removeGrupoQueue(grupo);
+    // await removeGrupoQueue(grupo);
   } else {
     throw Exception('Failed to upload.');
   }

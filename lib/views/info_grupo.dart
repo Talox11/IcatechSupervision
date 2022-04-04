@@ -53,8 +53,6 @@ class _InfoGrupoState extends State<InfoGrupo> {
       String body = utf8.decode(response.bodyBytes);
       final jsonData = jsonDecode(body);
       _listAlumnos = await _getAlumnos(jsonData[0]['id']);
-      print('Alumnos info=>' + _listAlumnos[0].toString());
-
       Grupo grupo = Grupo(
           jsonData[0]['id'],
           jsonData[0]['curso'],
@@ -95,13 +93,19 @@ class _InfoGrupoState extends State<InfoGrupo> {
         } else {
           // si no existe, hace peticion al servidor
           print('registro nuevo');
-          checkInternetConn().then((connectivityExist) {
-            if (connectivityExist) {
-              _futureGrupo = _getInfoGrupo(widget.clave);
-            } else {
-              _futureGrupo = null;
-            }
-          });
+          bool connected = await checkInternetConn() as bool;
+          if (connected) {
+            _futureGrupo = _getInfoGrupo(widget.clave);
+          } else {
+            _futureGrupo = null;
+          }
+          // checkInternetConn().then((connectivityExist) {
+          //   if (connectivityExist) {
+          //     _futureGrupo = _getInfoGrupo(widget.clave);
+          //   } else {
+          //     _futureGrupo = null;
+          //   }
+          // });
         }
       });
     } catch (e) {
@@ -234,7 +238,7 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
   // print(infoGrupo.alumnos);
 
   List<Alumno> alumnos = infoGrupo.alumnos;
-  inspect(alumnos);
+
   for (Alumno alumno in alumnos) {
     widgetInfoGeneral.add(
       InkWell(
@@ -316,8 +320,7 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
     callback: () {
       checkInternetConn().then((connectivityExist) async {
         if (connectivityExist) {
-          uploadGrupo(infoGrupo, context);
-          showUploadDone(context);
+          showUploadDone(context, infoGrupo);
         } else {
           showNoInternetConn(context);
           addQueue(infoGrupo, context);
@@ -369,7 +372,7 @@ Future saveTemporaly(grupo) async {
       version: 1, onCreate: (Database db, int version) async {});
 
   await database.transaction((txn) async {
-    print('new grupo record');
+    
     List<Alumno> alumnos = grupo.alumnos;
 
     txn.rawInsert(
@@ -444,7 +447,6 @@ Future<Grupo> getGrupoFromLocalDB(clave) async {
     List _listAlumnos =
         await _getAlumnosFromLocalDB(dataGrupo[0]['id_registro'], database);
 
-    // inspect(_listAlumnos[0]);
     Grupo grupo = Grupo(
       dataGrupo[0]['id_registro'].toString(),
       dataGrupo[0]['curso'],
@@ -464,7 +466,7 @@ Future<Grupo> getGrupoFromLocalDB(clave) async {
     // grupo.isQueue = int.parse(dataGrupo[0]['is_queue']);
 
     await grupo.addAlumos2(_listAlumnos);
-    inspect(grupo);
+
     return grupo;
   } catch (e) {
     rethrow;
@@ -522,9 +524,9 @@ Future<Alumno> getTemporalyAlumnos(idRegistro) async {
   return alumno;
 }
 
-Future uploadGrupo(grupo, context) async {
-  String grupoAux = jsonEncode(grupo);
-  String listAlumn = await getAlumnos(grupo['id_registro']);
+Future uploadGrupo(Grupo grupo, context) async {
+  String grupoAux = jsonEncode(grupo.toJson());
+  String listAlumn = await getAlumnos(grupo.id);
 
   final response = await http.post(
     Uri.parse(Environment.apiUrl + '/grupo/insert'),
@@ -545,6 +547,24 @@ Future uploadGrupo(grupo, context) async {
   }
 }
 
+getAlumnos(id_curso) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+  // await deleteDatabase(path);
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+  List alumnos_temp =
+      await database.query('alumnos_pre_temp where id_curso = $id_curso');
+  String aux = jsonEncode(alumnos_temp);
+  print(aux);
+
+  for (var alumno in alumnos_temp) {
+    print(alumno);
+  }
+  return jsonEncode(alumnos_temp).toString();
+}
+
 Future addQueue(grupo, context) async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
@@ -559,12 +579,18 @@ Future addQueue(grupo, context) async {
   });
 }
 
-showUploadDone(BuildContext context) {
+showUploadDone(BuildContext context, Grupo grupo) {
   // set up the buttons
-
+  Widget cancelButton = TextButton(
+    child: const Text('Cancelar'),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  );
   Widget continueButton = TextButton(
     child: const Text('Aceptar'),
     onPressed: () async {
+      await uploadGrupo(grupo, context);
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -575,9 +601,10 @@ showUploadDone(BuildContext context) {
 
   // set up the AlertDialog
   AlertDialog alert = AlertDialog(
-    title: const Text('Exito'),
-    content: const Text('Se guardo el registro'),
+    title: const Text('Atencion'),
+    content: const Text('¿Deseas guardar el registro?'),
     actions: [
+      cancelButton,
       continueButton,
     ],
   );
@@ -625,18 +652,37 @@ showNoInternetConn(BuildContext context) {
   );
 }
 
+Future removeGrupoQueue(grupo) async {
+  inspect(grupo);
+  var idRegistro = grupo.id;
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
 
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
 
-checkInternetConn() async {
+  await database.transaction((txn) async {
+    var result = txn.rawDelete(
+        'DELETE FROM tbl_grupo_temp WHERE id_registro = ${idRegistro}');
+
+    var result2 = txn.rawDelete(
+        'DELETE FROM alumnos_pre_temp WHERE id_curso = ${idRegistro}');
+  });
+
+  database.close();
+}
+
+Future checkInternetConn() async {
   try {
-    final result = await InternetAddress.lookup('google.com');
-    print(result);
+    final result = await InternetAddress.lookup('icatech-mobile.herokuapp.com/');
+
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
       print('connected');
       return true;
     }
   } on SocketException catch (_) {
     print('not connected');
+
     return false;
   }
 }

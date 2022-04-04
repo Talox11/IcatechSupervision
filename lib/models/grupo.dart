@@ -94,4 +94,24 @@ class Grupo {
     alumnos = listAlumnos;
     print(alumnos);
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'curso': curso,
+      'cct': cct,
+      'unidad': unidad,
+      'clave': clave,
+      'mod': mod,
+      'inicio': inicio,
+      'termino': termino,
+      'area': area,
+      'espe': espe,
+      'tcapacitacion': tcapacitacion,
+      'depen': depen,
+      'tipo_curso': tipoCurso,
+      'isEditing': isEditing,
+      'isQueue': isQueue,
+    };
+  }
 }
