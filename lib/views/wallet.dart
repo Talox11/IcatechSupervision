@@ -73,28 +73,30 @@ class _WalletState extends State<Wallet> {
                     ),
                   ],
                 ),
-                child: TextField(
+                child: Expanded(
+                    child: TextField(
                   controller: _controller,
                   decoration: const InputDecoration(
                       prefixIcon: Icon(CupertinoIcons.search),
                       hintText: 'Buscar por clave de grupo'),
-                ),
+                )),
               ),
-              MaterialButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              InfoGrupo(clave: _controller.text),
-                        ));
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: Repository.accentColor(context),
-                    child: Icon(IconlyBold.Search,
-                        color: Repository.textColor(context)),
-                    radius: 23,
-                  )),
+              Expanded(
+                  child: MaterialButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  InfoGrupo(clave: _controller.text),
+                            ));
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Repository.accentColor(context),
+                        child: Icon(IconlyBold.Search,
+                            color: Repository.textColor(context)),
+                        radius: 23,
+                      ))),
             ],
           ),
           FutureBuilder(
@@ -134,10 +136,10 @@ class _WalletState extends State<Wallet> {
     for (var grupo in dataResponse) {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
-        onTap: ()  {
-          
-          _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
-           Navigator.push(
+        onTap: () {
+          _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length));
+          Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => InfoGrupo(clave: grupo['clave']),
