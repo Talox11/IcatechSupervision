@@ -32,41 +32,86 @@ class Grupo {
       this.depen,
       this.tipoCurso);
 
-  setAlumnos(response) {
+  addAlumos(response) {
     for (var item in response) {
       Alumno alu = Alumno(
         item['id'],
         item['id_curso'],
         item['nombre'],
-        item['curp'],
-        item['matricula'],
         item['apellido_paterno'],
         item['apellido_materno'],
         item['correo'] ?? 'no cuenta con email',
         item['telefono'] ?? 'no cuenta con telefono',
+        item['curp'],
         item['sexo'],
         item['fecha_nacimiento'],
         item['domicilio'],
+        item['colonia'],
+        item['municipio'],
         item['estado'],
         item['estado_civil'],
+        item['matricula'],
       );
       alumnos.add(alu);
     }
   }
 
-  // Map toJson() => {
-  //     'id_registro':id,
-  //     'curso':curso,
-  //     'cct':cct,
-  //     'unidad':unidad,
-  //     'clave':clave,
-  //     'mod':mod,
-  //     'inicio':inicio,
-  //     'termino':termino,
-  //     'area':area,
-  //     'espe':espe,
-  //     'tcapacitacion':tcapacitacion,
-  //     'depen':depen,
-  //     'tipoCurso':tipoCurso,
-  //   };
+  addAlumos2(response) {
+    for (var item in response) {
+      Alumno alu = Alumno(
+        item['id_registro'].toString(),
+        item['id_curso'].toString(),
+        item['nombre'],
+        item['apellido_paterno'],
+        item['apellido_materno'],
+        item['correo'] ?? 'no cuenta con email',
+        item['telefono'] ?? 'no cuenta con telefono',
+        item['curp'],
+        item['sexo'],
+        item['fecha_nacimiento'],
+        item['domicilio'],
+        item['colonia'],
+        item['municipio'],
+        item['estado'],
+        item['estado_civil'],
+        item['matricula'],
+      );
+
+      alu.entidadNacimiento = item['entidad_nacimiento'];
+      alu.observaciones = item['observaciones'];
+      alu.calle = item['calle'];
+      alu.seccionVota = item['seccion_vota'];
+      alu.numExt = item['numExt'];
+      alu.numInt = item['numInt'];
+      alu.respSatisfaccion = item['resp_satisfaccion'];
+      alu.comSatisfaccion = item['com_satisfaccion'];
+
+      alumnos.add(alu);
+    }
+  }
+
+  setListAlumnos(listAlumnos) {
+    alumnos = listAlumnos;
+    print(alumnos);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'curso': curso,
+      'cct': cct,
+      'unidad': unidad,
+      'clave': clave,
+      'mod': mod,
+      'inicio': inicio,
+      'termino': termino,
+      'area': area,
+      'espe': espe,
+      'tcapacitacion': tcapacitacion,
+      'depen': depen,
+      'tipo_curso': tipoCurso,
+      'isEditing': isEditing,
+      'isQueue': isQueue,
+    };
+  }
 }

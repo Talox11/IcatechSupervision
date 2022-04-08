@@ -1,11 +1,15 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter_banking_app/enviroment/enviroment.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
 import 'package:flutter_banking_app/view_models/view_models.dart';
 import 'package:flutter_banking_app/widgets/bottom_nav.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async{
   
+  await dotenv.load(fileName: Environment.fileName);
   runApp(const MyApp());
 }
 

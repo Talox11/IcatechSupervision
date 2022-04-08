@@ -4,7 +4,7 @@ import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/iconly/iconly_light.dart';
 import 'package:gap/gap.dart';
 
-AppBar myAppBar({required String title, String? stringColor, required bool implyLeading, required BuildContext context, bool? hasAction}) {
+AppBar myAppBar({required String title, String? stringColor, required bool implyLeading, required BuildContext context, bool? hasAction,}) {
   return AppBar(
     centerTitle: true,
     title: Text(title, style: TextStyle(color: Repository.textColor(context), fontSize: 18),),

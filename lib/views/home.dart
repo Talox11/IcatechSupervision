@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_banking_app/models/db_helper.dart';
+import 'package:flutter_banking_app/models/grupo.dart';
 
 import 'package:flutter_banking_app/repo/repository.dart';
 import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
@@ -17,6 +19,8 @@ import 'package:http/http.dart' as http;
 import 'package:postgres/postgres.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
+import '../enviroment/Enviroment.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -89,7 +93,7 @@ class _HomeState extends State<Home> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hola verificador',
+                        Text('Hola verificador' + Environment.fileName,
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 16)),
@@ -117,30 +121,9 @@ class _HomeState extends State<Home> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         InkWell(
-                          onTap: () {
-                            // donwload db
-                            checkInternetConnection().then((connected) {
-                              if (connected) {
-                                showDownloadDBDialog(context);
-                              } else {
-                                showNoInternetConn(context);
-                              }
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF026EF4).withOpacity(0.15),
-                            ),
-                            child: const Icon(IconlyBold.Download,
-                                color: Color(0xFF026EF4)),
-                          ),
-                        ),
-                        InkWell(
                           onTap: () async {
                             //update
-                            checkInternetConnection().then((connected) async {
+                            checkInternetConn().then((connected) async {
                               if (connected) {
                                 await showSyncDialog(context, this);
                                 setState(() {
@@ -210,12 +193,16 @@ class _HomeState extends State<Home> {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
         onTap: () async {
-          await checkInternetConnection().then((onValue) async {
+          await checkInternetConn().then((onValue) async {
             if (onValue) {
+              
+
+              DialogBuilder(context).showLoadingIndicator();
               await uploadGrupo(grupo);
               await state.setState(() {
                 _futureGrupo = getQueueUpload();
               });
+              DialogBuilder(context).hideOpenDialog();
             } else {
               showNoInternetConn(context);
             }
@@ -265,56 +252,6 @@ class _HomeState extends State<Home> {
     }
 
     return widgetView;
-  }
-
-  showDownloadDBDialog(BuildContext context) {
-    // set up the buttons
-    Widget cancelButton = TextButton(
-      child: const Text('Cancelar'),
-      onPressed: () {
-        Navigator.pop(context);
-      },
-    );
-    Widget continueButton = TextButton(
-      child: const Text('Continuar'),
-      onPressed: () async {
-        bool connectivityExist = false;
-        await checkInternetConnection().then((onValue) {
-          connectivityExist = onValue;
-          print('On connectivityExist =  $connectivityExist');
-        });
-
-        if (connectivityExist) {
-          print('downloading');
-          DialogBuilder(context).showLoadingIndicator();
-          await downloadDB();
-          Navigator.pop(context);
-          DialogBuilder(context).hideOpenDialog();
-        } else {
-          print('No hay conexion');
-        }
-      },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: const Text('Atencion'),
-      content: const Text(
-          'Descargar la base de datos te permitirá usar la aplicación sin conexión a internet,'
-          ' pero consumirá parte de tu almacenamiento interno, ¿deseas continuar?'),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
   }
 
   showNoInternetConn(BuildContext context) {
@@ -392,30 +329,15 @@ uploadAllGrupos(state) async {
 
   List gruposList = await database
       .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
-  
+
   for (var grupo in gruposList) {
     await uploadGrupo(grupo);
   }
 }
 
-Future<List> downloadDB() async {
-  late List _listGrupos = [];
-  late List _listAlumnosInscritos = [];
-  late List _listAlumnosPre = [];
-  // saveDB(jsonData);
-  print('dowloading ');
-  _listGrupos = await _getGrupos();
-  _listAlumnosInscritos = await _getAlumnosInscritos();
-  _listAlumnosPre = await _getAlumnosPre();
-
-  await saveDB(_listGrupos, _listAlumnosInscritos, _listAlumnosPre);
-  return [
-    {'done'}
-  ];
-}
-
 Future<List> _getGrupos() async {
-  final response = await http.get(Uri.parse('http://10.0.2.2:5000/list/grupo'));
+  final response =
+      await http.get(Uri.parse(Environment.apiUrl + '/list/grupo'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -427,7 +349,7 @@ Future<List> _getGrupos() async {
 
 Future<List> _getAlumnosInscritos() async {
   final response =
-      await http.get(Uri.parse('http://10.0.2.2:5000/list/alumnosInscritos'));
+      await http.get(Uri.parse(Environment.apiUrl + '/list/alumnosInscritos'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -439,7 +361,7 @@ Future<List> _getAlumnosInscritos() async {
 
 Future<List> _getAlumnosPre() async {
   final response =
-      await http.get(Uri.parse('http://10.0.2.2:5000/list/alumnosPre'));
+      await http.get(Uri.parse(Environment.apiUrl + '/list/alumnosPre'));
 
   if (response.statusCode == 200) {
     String body = utf8.decode(response.bodyBytes);
@@ -449,31 +371,44 @@ Future<List> _getAlumnosPre() async {
   }
 }
 
-Future<List> saveDB(grupos, alumnosIns, alumnosPre) async {
-  await dowloadDB(grupos, alumnosIns, alumnosPre);
-  return [
-    {'done'}
-  ];
-}
-
 Future createTables() async {
   helperCreateTables();
 }
 
-Future<bool> checkInternetConnection() async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.mobile ||
-      connectivityResult == ConnectivityResult.wifi) {
-    return true;
-  } else {
+Future<bool> checkInternetConn() async {
+  try {
+    final result = await InternetAddress.lookup('google.com.mx');
+    print(result);
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      print('connected');
+      return true;
+    } else {
+      return false;
+    }
+  } on SocketException catch (_) {
+    print('not connected');
     return false;
   }
 }
 
+//   checkInternetConn() async {
+//   try {
+//     final result = await InternetAddress.lookup('https://icatech-mobile.herokuapp.com/');
+//     print(result);
+//     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+//       print('connected');
+//       return true;
+//     }
+//   } on SocketException catch (_) {
+//     print('not connected');
+//     return false;
+//   }
+// }
+
 Future<bool> verifyIfTableExist(db, tableName) async {
   List row = await db
       .query('sqlite_master', where: 'name = ?', whereArgs: [tableName]);
-  
+
   if (row.isEmpty) {
     return false;
   } else {
@@ -495,69 +430,27 @@ Widget customColumn({required String title, required String subtitle}) {
 }
 
 Future uploadGrupo(grupo) async {
-  var connection = PostgreSQLConnection('10.0.2.2', 5432, 'server_movil',
-      username: 'postgres', password: '8552');
-  await connection.open();
+  String grupoAux = jsonEncode(grupo);
+  String listAlumn = await getAlumnos(grupo['id_registro']);
+  var test =
+      jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn});
 
-  List<List<dynamic>> results =
-      await connection.query('Select * from public.prueba');
-  var row;
-  await connection.transaction((ctx) async {
-    row = await ctx.query(
-        'INSERT INTO grupo_auditado (curso,cct, unidad, clave, mod, espe, tcapacitacion, depen, tipo_curso ) '
-        'VALUES (@curso:text, @cct:text, @unidad:text, @clave:text, @mod:text, @espe:text, @tcapacitacion:text, @depen:text, @tipo_curso:text) RETURNING id as id_inserted ',
-        substitutionValues: {
-          'curso': grupo['curso'],
-          'cct': grupo['cct'],
-          'unidad': grupo['unidad'],
-          'clave': grupo['clave'],
-          'mod': grupo['mod'],
-          'area': grupo['area'] ?? 'N/A',
-          'espe': grupo['espe'],
-          'tcapacitacion': grupo['tcapacitacion'],
-          'depen': grupo['depen'],
-          'tipo_curso': grupo['tipo_curso'],
-        });
-    return row;
-    // );
-  }).then((insertedId) async {
-    await connection.transaction((ctx) async {
-      List alumnos = await getAlumnos(grupo['id_registro']);
+  final response = await http.post(
+    Uri.parse(Environment.apiUrl + '/grupo/insert'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
+  );
 
-      for (final alumno in alumnos) {
-        var result = await ctx.query(
-            'INSERT INTO alumno_auditado (id_curso, nombre, curp, matricula, apellido_paterno, apellido_materno, correo, telefono, sexo, fecha_nacimiento, domicilio, estado, estado_civil, entidad_nacimiento, seccion_vota, calle, num_ext, num_int, observaciones, resp_satisfaccion, com_satisfaccion) '
-            'VALUES (@id_curso:text, @nombre:text, @curp:text, @matricula:text, @apellido_paterno:text, @apellido_materno:text, @correo:text, @telefono:text, @sexo:text, @fecha_nacimiento:text, @domicilio:text, @estado:text, @estado_civil:text, @entidad_nacimiento:text, @seccion_vota:text, @calle:text, @num_ext:text, @num_int:text, @observaciones:text, @resp_satisfaccion:text, @com_satisfaccion:text) RETURNING id as id_inserted',
-            substitutionValues: {
-              'id_curso': insertedId.last[0].toString(),
-              'nombre': alumno['nombre'],
-              'curp': alumno['curp'],
-              'matricula': alumno['matricula'],
-              'apellido_paterno': alumno['apellido_paterno'],
-              'apellido_materno': alumno['apellido_materno'],
-              'correo': alumno['correo'],
-              'telefono': alumno['telefono'],
-              'sexo': alumno['sexo'],
-              'fecha_nacimiento': alumno['fecha_nacimiento'],
-              'domicilio': alumno['domicilio'],
-              'estado': alumno['estado'],
-              'estado_civil': alumno['estado_civil'],
-              'entidad_nacimiento':
-                  alumno['entidad_nacimiento'], //entidad nacimiento,
-              'seccion_vota': alumno['seccion_vota'],
-              'calle': alumno['calle'], //calle
-              'num_ext': alumno['numExt'],
-              'num_int': alumno['numInt'],
-              'observaciones': alumno['observaciones'], //observaciones
-              'resp_satisfaccion': alumno['resp_satisfaccion'],
-              'com_satisfaccion': alumno['com_satisfaccion'],
-            });
-      }
-    });
+  if (response.statusCode == 201) {
+    String body = utf8.decode(response.bodyBytes);
+    final jsonData = jsonDecode(body);
+    print(jsonData);
     await removeGrupoQueue(grupo);
-  });
-
-  connection.close();
+  } else {
+    throw Exception('Failed to upload.');
+  }
 }
 
 Future removeGrupoQueue(grupo) async {
@@ -586,8 +479,13 @@ getAlumnos(id_curso) async {
 
   Database database = await openDatabase(path,
       version: 1, onCreate: (Database db, int version) async {});
-  List alumnos_temp = await database
-      .rawQuery('SELECT * FROM alumnos_pre_temp where id_curso = $id_curso');
-
-  return alumnos_temp;
+  List alumnos_temp =
+      await database.query('alumnos_pre_temp where id_curso = $id_curso');
+  String aux = jsonEncode(alumnos_temp);
+  // print(aux);
+  // inspect(alumnos_temp[2].row);
+  // for (var alumno in alumnos_temp) {
+  //   print(alumno.row);
+  // }
+  return jsonEncode(alumnos_temp).toString();
 }

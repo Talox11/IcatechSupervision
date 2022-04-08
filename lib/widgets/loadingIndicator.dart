@@ -38,7 +38,7 @@ class LoadingIndicator extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    var displayedText = 'Descargando base de datos, esto puede tomar unos minutos';
+    var displayedText = 'Guardando informacion, esto puede tomar unos segundos';
 
     return Container(
         padding: EdgeInsets.all(16),
