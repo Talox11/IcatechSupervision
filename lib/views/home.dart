@@ -195,10 +195,14 @@ class _HomeState extends State<Home> {
         onTap: () async {
           await checkInternetConn().then((onValue) async {
             if (onValue) {
+              
+
+              DialogBuilder(context).showLoadingIndicator();
               await uploadGrupo(grupo);
               await state.setState(() {
                 _futureGrupo = getQueueUpload();
               });
+              DialogBuilder(context).hideOpenDialog();
             } else {
               showNoInternetConn(context);
             }
@@ -378,7 +382,7 @@ Future<bool> checkInternetConn() async {
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
       print('connected');
       return true;
-    }else{
+    } else {
       return false;
     }
   } on SocketException catch (_) {
@@ -438,13 +442,12 @@ Future uploadGrupo(grupo) async {
     },
     body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
   );
-  inspect(response);
 
   if (response.statusCode == 201) {
     String body = utf8.decode(response.bodyBytes);
     final jsonData = jsonDecode(body);
     print(jsonData);
-    // await removeGrupoQueue(grupo);
+    await removeGrupoQueue(grupo);
   } else {
     throw Exception('Failed to upload.');
   }

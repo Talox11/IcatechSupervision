@@ -12,6 +12,7 @@ import 'package:flutter_banking_app/utils/layouts.dart';
 import 'package:flutter_banking_app/utils/styles.dart';
 
 import 'package:flutter_banking_app/widgets/buttons.dart';
+import 'package:flutter_banking_app/widgets/loadingIndicator.dart';
 import 'package:flutter_banking_app/widgets/my_app_bar.dart';
 import 'package:flutter_banking_app/widgets/separator.dart';
 import 'package:gap/gap.dart';
@@ -48,7 +49,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
       },
       body: jsonEncode(<String, String>{'clave': clave}),
     );
-
+    inspect(response);
     if (response.statusCode == 201) {
       String body = utf8.decode(response.bodyBytes);
       final jsonData = jsonDecode(body);
@@ -320,7 +321,7 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
     callback: () {
       checkInternetConn().then((connectivityExist) async {
         if (connectivityExist) {
-          showUploadDone(context, infoGrupo);
+          showConfirmation(context, infoGrupo);
         } else {
           showNoInternetConn(context);
           addQueue(infoGrupo, context);
@@ -372,7 +373,6 @@ Future saveTemporaly(grupo) async {
       version: 1, onCreate: (Database db, int version) async {});
 
   await database.transaction((txn) async {
-    
     List<Alumno> alumnos = grupo.alumnos;
 
     txn.rawInsert(
@@ -579,7 +579,7 @@ Future addQueue(grupo, context) async {
   });
 }
 
-showUploadDone(BuildContext context, Grupo grupo) {
+showConfirmation(BuildContext context, Grupo grupo) {
   // set up the buttons
   Widget cancelButton = TextButton(
     child: const Text('Cancelar'),
@@ -590,7 +590,9 @@ showUploadDone(BuildContext context, Grupo grupo) {
   Widget continueButton = TextButton(
     child: const Text('Aceptar'),
     onPressed: () async {
+      DialogBuilder(context).showLoadingIndicator();
       await uploadGrupo(grupo, context);
+      DialogBuilder(context).hideOpenDialog();
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -674,7 +676,7 @@ Future removeGrupoQueue(grupo) async {
 
 Future checkInternetConn() async {
   try {
-    final result = await InternetAddress.lookup('icatech-mobile.herokuapp.com/');
+    final result = await InternetAddress.lookup('google.com.mx');
 
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
       print('connected');
