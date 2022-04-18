@@ -73,30 +73,32 @@ class _WalletState extends State<Wallet> {
                     ),
                   ],
                 ),
-                child: Expanded(
-                    child: TextField(
+                child: TextField(
                   controller: _controller,
                   decoration: const InputDecoration(
                       prefixIcon: Icon(CupertinoIcons.search),
                       hintText: 'Buscar por clave de grupo'),
-                )),
+                ),
               ),
-              Expanded(
-                  child: MaterialButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  InfoGrupo(clave: _controller.text),
-                            ));
-                      },
-                      child: CircleAvatar(
-                        backgroundColor: Repository.accentColor(context),
-                        child: Icon(IconlyBold.Search,
-                            color: Repository.textColor(context)),
-                        radius: 23,
-                      ))),
+              MaterialButton(
+                  onPressed: () {
+                    if (_controller.text.isEmpty) {
+                      inputEmptyMsg(context);
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                InfoGrupo(clave: _controller.text),
+                          ));
+                    }
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: Repository.accentColor(context),
+                    child: Icon(IconlyBold.Search,
+                        color: Repository.textColor(context)),
+                    radius: 23,
+                  )),
             ],
           ),
           FutureBuilder(
@@ -202,5 +204,33 @@ Widget customColumn({required String title, required String subtitle}) {
       Text(subtitle,
           style: TextStyle(fontSize: 19, color: Colors.white.withOpacity(0.8))),
     ],
+  );
+}
+
+inputEmptyMsg(BuildContext context) {
+  // set up the buttons
+
+  Widget continueButton = TextButton(
+    child: const Text('Aceptar'),
+    onPressed: () async {
+      Navigator.pop(context);
+    },
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: const Text('Oops!'),
+    content: const Text('Por favor introduce la clave de curso'),
+    actions: [
+      continueButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
   );
 }

@@ -94,7 +94,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
         } else {
           // si no existe, hace peticion al servidor
           print('registro nuevo');
-          bool connected = await checkInternetConn() as bool;
+          bool connected =  await checkInternetConn() ;
           if (connected) {
             _futureGrupo = _getInfoGrupo(widget.clave);
           } else {
