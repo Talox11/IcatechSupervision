@@ -105,7 +105,7 @@
     },
     {
       "name": "dbus",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.2",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.3",
       "packageUri": "lib/",
       "languageVersion": "2.15"
     },
@@ -142,6 +142,12 @@
     {
       "name": "flutter",
       "rootUri": "file:///C:/flutter/packages/flutter",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_dotenv",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_dotenv-5.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -458,7 +464,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2022-04-18T13:45:16.782146Z",
+  "generated": "2022-04-18T13:46:16.936879Z",
   "generator": "pub",
   "generatorVersion": "2.16.2"
 }

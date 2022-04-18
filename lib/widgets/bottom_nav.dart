@@ -22,7 +22,6 @@ class _BottomNavState extends State<BottomNav> {
   static final List<Widget> _widgetOptions = <Widget>[
     const Home(),
     const Wallet(),
-    // const TestQuery(),
     // const Profile(),
   ];
 
@@ -55,10 +54,7 @@ class _BottomNavState extends State<BottomNav> {
             icon: Icon(IconlyBold.Document),
             label: 'Wallet',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(IconlyBold.Chart),
-          //   label: 'Stats',
-          // ),
+          
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

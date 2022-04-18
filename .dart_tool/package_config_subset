@@ -68,8 +68,8 @@ file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/date_time_picker-2.1.0/
 file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/date_time_picker-2.1.0/lib/
 dbus
 2.15
-file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.2/
-file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.2/lib/
+file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.3/
+file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/dbus-0.7.3/lib/
 equatable
 2.12
 file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/equatable-2.0.3/
@@ -90,6 +90,10 @@ fl_chart
 2.12
 file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/fl_chart-0.50.0/
 file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/fl_chart-0.50.0/lib/
+flutter_dotenv
+2.12
+file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_dotenv-5.0.2/
+file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_dotenv-5.0.2/lib/
 flutter_lints
 2.12
 file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_lints-1.0.4/
