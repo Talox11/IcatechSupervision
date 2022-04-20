@@ -93,7 +93,7 @@ class _HomeState extends State<Home> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hola verificador' + Environment.fileName,
+                        Text('Hola supervisor' ,
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 16)),
@@ -335,41 +335,12 @@ uploadAllGrupos(state) async {
   }
 }
 
-Future<List> _getGrupos() async {
-  final response =
-      await http.get(Uri.parse(Environment.apiUrl + '/list/grupo'));
 
-  if (response.statusCode == 200) {
-    String body = utf8.decode(response.bodyBytes);
-    return jsonDecode(body);
-  } else {
-    throw Exception('Failed to create album.');
-  }
-}
 
-Future<List> _getAlumnosInscritos() async {
-  final response =
-      await http.get(Uri.parse(Environment.apiUrl + '/list/alumnosInscritos'));
 
-  if (response.statusCode == 200) {
-    String body = utf8.decode(response.bodyBytes);
-    return jsonDecode(body);
-  } else {
-    throw Exception('Falló la conexión');
-  }
-}
 
-Future<List> _getAlumnosPre() async {
-  final response =
-      await http.get(Uri.parse(Environment.apiUrl + '/list/alumnosPre'));
 
-  if (response.statusCode == 200) {
-    String body = utf8.decode(response.bodyBytes);
-    return jsonDecode(body);
-  } else {
-    throw Exception('Falló la conexión');
-  }
-}
+
 
 Future createTables() async {
   helperCreateTables();
@@ -436,7 +407,7 @@ Future uploadGrupo(grupo) async {
       jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn});
 
   final response = await http.post(
-    Uri.parse(Environment.apiUrl + '/grupo/insert'),
+    Uri.parse(Environment.apiUrlNode + '/grupo/insert'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },

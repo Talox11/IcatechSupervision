@@ -51,7 +51,7 @@
     },
     {
       "name": "connectivity_plus",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/connectivity_plus-2.2.1",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/connectivity_plus-2.3.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -63,7 +63,7 @@
     },
     {
       "name": "connectivity_plus_macos",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/connectivity_plus_macos-1.2.1",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/connectivity_plus_macos-1.2.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -135,7 +135,7 @@
     },
     {
       "name": "fl_chart",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/fl_chart-0.50.0",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/fl_chart-0.50.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -375,13 +375,13 @@
     },
     {
       "name": "sqflite",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/sqflite-2.0.2",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/sqflite-2.0.2+1",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.16"
     },
     {
       "name": "sqflite_common",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/sqflite_common-2.2.1",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/sqflite_common-2.2.1+1",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     },
@@ -441,7 +441,7 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/win32-2.5.0",
+      "rootUri": "file:///C:/flutter/.pub-cache/hosted/pub.dartlang.org/win32-2.5.1",
       "packageUri": "lib/",
       "languageVersion": "2.15"
     },
@@ -464,7 +464,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2022-04-18T13:46:16.936879Z",
+  "generated": "2022-04-20T15:34:51.045691Z",
   "generator": "pub",
   "generatorVersion": "2.16.2"
 }

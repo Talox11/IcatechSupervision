@@ -23,6 +23,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../enviroment/enviroment.dart';
+import '../utils/iconly/iconly_bold.dart';
 import '../widgets/bottom_nav.dart';
 import 'home.dart';
 import 'info_alumno.dart';
@@ -42,20 +43,20 @@ class _InfoGrupoState extends State<InfoGrupo> {
   Future<Grupo> _getInfoGrupo(clave) async {
     List _listAlumnos = [];
 
-    final response = await http.post(
-      Uri.parse(Environment.apiUrl + '/curso'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{'clave': clave}),
-    );
-    inspect(response);
-    if (response.statusCode == 201) {
-      String body = utf8.decode(response.bodyBytes);
-      final jsonData = jsonDecode(body);
+    final response = await http.get(
+        Uri.parse(
+            Environment.apiUrlLaravel + '/supervision/movil/curso/' + clave),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        });
+    // inspect(response);
+
+    if (response.statusCode == 200) {
+      // String body = utf8.decode(response.bodyBytes);
+      final jsonData = jsonDecode(response.body);
       _listAlumnos = await _getAlumnos(jsonData[0]['id']);
       Grupo grupo = Grupo(
-          jsonData[0]['id'],
+          jsonData[0]['id'].toString(),
           jsonData[0]['curso'],
           jsonData[0]['cct'],
           jsonData[0]['unidad'],
@@ -81,38 +82,34 @@ class _InfoGrupoState extends State<InfoGrupo> {
           'Failed to create album.: ' + response.statusCode.toString());
     }
   }
-
   @override
   void initState() {
+    var clave = widget.clave;
+
     try {
-      tempRecordExist('tbl_grupo_temp', 'clave', widget.clave)
+      tempRecordExist('tbl_grupo_temp', 'clave',
+              widget.clave) //verify is the group exist on sqlite
           .then((exist) async {
         if (exist) {
-          print('registro almacenado localmente');
           //si existe localmente obtiene datos
-          _futureGrupo = getGrupoFromLocalDB(widget.clave);
+          print('registro almacenado localmente');
+          _futureGrupo = getGrupoFromLocalDB(clave); // i get info from sqlite
         } else {
           // si no existe, hace peticion al servidor
           print('registro nuevo');
-          bool connected =  await checkInternetConn() ;
+          bool connected =
+              await checkInternetConn(); //verify if i have internet connection
           if (connected) {
-            _futureGrupo = _getInfoGrupo(widget.clave);
+            _futureGrupo = _getInfoGrupo(widget
+                .clave); //if group doesn't exist i get info from a remote server
           } else {
             _futureGrupo = null;
           }
-          // checkInternetConn().then((connectivityExist) {
-          //   if (connectivityExist) {
-          //     _futureGrupo = _getInfoGrupo(widget.clave);
-          //   } else {
-          //     _futureGrupo = null;
-          //   }
-          // });
         }
       });
     } catch (e) {
       print(e);
     }
-
     super.initState();
   }
 
@@ -129,6 +126,10 @@ class _InfoGrupoState extends State<InfoGrupo> {
           future: _futureGrupo,
           builder: (context, snapshot) {
             print(snapshot.connectionState);
+
+            if (snapshot.connectionState != ConnectionState.waiting) {
+              //stream has loaded some first values
+            }
             switch (snapshot.connectionState) {
               case ConnectionState.none:
                 return Column(
@@ -141,7 +142,39 @@ class _InfoGrupoState extends State<InfoGrupo> {
                         style: TextStyle(
                             color: Styles.icatechPurpleColor.withOpacity(0.7),
                             fontSize: 30)),
-                    const Gap(10),
+                    const Gap(50),
+                    Row(
+                        //iconos tab
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: () async {
+                              //update
+                              setState(() {
+                                _futureGrupo =
+                                    getGrupoFromLocalDB(widget.clave);
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color:
+                                    const Color(0xFFFB6A4B).withOpacity(0.15),
+                              ),
+                              child: const Icon(IconlyBold.Search,
+                                  color: Color(0xFFFB6A4B)),
+                            ),
+                          ),
+                          const Gap(10),
+                          Text(
+                              'Reintentar',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Styles.icatechPurpleColor
+                                      .withOpacity(0.7),
+                                  fontSize: 30)),
+                        ]),
                   ],
                 );
               case ConnectionState.waiting:
@@ -164,24 +197,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
                               color: Styles.icatechPurpleColor.withOpacity(0.7),
                               fontSize: 30)),
                       const Gap(10),
-                      Text(
-                          'Intenta descargar la base de datos para entrar en modo offline',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Styles.icatechPurpleColor.withOpacity(0.7),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
                       const Gap(30),
-                      Text(
-                          'file' +
-                              Environment.fileName +
-                              '   api=> ' +
-                              Environment.apiUrl,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Styles.icatechPurpleColor.withOpacity(0.7),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold))
                     ],
                   );
                 } else {
@@ -336,12 +352,12 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
 }
 
 Future<List> _getAlumnos(clave) async {
-  final response =
-      await http.get(Uri.parse(Environment.apiUrl + '/curso/$clave'));
+  final response = await http.get(Uri.parse(
+      Environment.apiUrlLaravel + '/supervision/movil/alumnos/$clave'));
 
   if (response.statusCode == 200) {
-    String body = utf8.decode(response.bodyBytes);
-    final jsonData = jsonDecode(body);
+    // String body = utf8.decode(response.bodyBytes);
+    final jsonData = jsonDecode(response.body);
     return jsonData;
   } else {
     throw Exception('Falló la conexión');
@@ -466,7 +482,7 @@ Future<Grupo> getGrupoFromLocalDB(clave) async {
     // grupo.isQueue = int.parse(dataGrupo[0]['is_queue']);
 
     await grupo.addAlumos2(_listAlumnos);
-
+    inspect(grupo);
     return grupo;
   } catch (e) {
     rethrow;
@@ -529,7 +545,7 @@ Future uploadGrupo(Grupo grupo, context) async {
   String listAlumn = await getAlumnos(grupo.id);
 
   final response = await http.post(
-    Uri.parse(Environment.apiUrl + '/grupo/insert'),
+    Uri.parse(Environment.apiUrlNode + '/grupo/insert'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -557,11 +573,7 @@ getAlumnos(id_curso) async {
   List alumnos_temp =
       await database.query('alumnos_pre_temp where id_curso = $id_curso');
   String aux = jsonEncode(alumnos_temp);
-  print(aux);
 
-  for (var alumno in alumnos_temp) {
-    print(alumno);
-  }
   return jsonEncode(alumnos_temp).toString();
 }
 
