@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:flutter_banking_app/models/grupo.dart';
 import 'package:flutter_banking_app/repo/repository.dart';
@@ -32,8 +33,8 @@ class _WalletState extends State<Wallet> {
 
   @override
   void initState() {
-    super.initState();
     _futureSavedGrupos = getSaved();
+    super.initState();
   }
 
   Future<List> getSaved() async {
@@ -76,7 +77,6 @@ class _WalletState extends State<Wallet> {
                 ),
                 child: TextField(
                   controller: _controller,
-                  enableInteractiveSelection: false,
                   decoration: const InputDecoration(
                       prefixIcon: Icon(CupertinoIcons.search),
                       hintText: 'Buscar por clave de grupo'),
@@ -87,7 +87,6 @@ class _WalletState extends State<Wallet> {
                     if (_controller.text.isEmpty) {
                       inputEmptyMsg(context);
                     } else {
-                      Future.delayed(const Duration(), () => SystemChannels.textInput.invokeMethod('TextInput.show'));
                       Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -194,6 +193,11 @@ class _WalletState extends State<Wallet> {
     }
 
     return widgetView;
+  }
+
+  FutureOr onGoBack(dynamic value) {
+    super.initState();
+    setState(() {});
   }
 }
 
