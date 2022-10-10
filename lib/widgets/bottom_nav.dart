@@ -21,10 +21,7 @@ class BottomNav extends StatefulWidget {
 
 /// This is the private State class that goes with MyStatefulWidget.
 class _BottomNavState extends State<BottomNav> {
-  String nombre = '';
-  String email_sivic = '';
-  int id_sivic = 0;
-  late SharedPreferences sharedPreferences;
+
 
 
   int _selectedIndex = 0;
@@ -43,16 +40,11 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   void initState() {
-      checkSesion();
+
       super.initState();
       // inicializarNotificacion();
   }
-  void checkSesion() async {
-      sharedPreferences = await SharedPreferences.getInstance();
-      
-      id_sivic = sharedPreferences.getInt('id_sivyc')!;
-      email_sivic = sharedPreferences.getString('correo')!;
-   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

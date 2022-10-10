@@ -22,16 +22,16 @@ class HttpHandle {
     
     try {
       final response = await http.post(
-      Uri.parse(Environment.apiUrlLaravel + '/sivycMovil/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-      body: jsonEncode(<String, String>{'email': email, 'password': password}),
-    );
-    inspect(response);
+        Uri.parse(Environment.apiUrlLaravel + '/sivycMovil/login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body:
+            jsonEncode(<String, String>{'email': email, 'password': password}),
+      );
+      inspect(response);
       if (response.statusCode == 200) {
         String body = utf8.decode(response.bodyBytes);
-        // await authSiata(email, token);
         return jsonDecode(body);
       }
       return null;
