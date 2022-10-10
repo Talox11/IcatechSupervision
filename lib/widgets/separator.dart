@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
+import 'package:supervision_icatech/repo/repository.dart';
 
 Widget separatorText(
     {required BuildContext context, required String text, Color? color}) {

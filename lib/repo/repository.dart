@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/view_models/view_models.dart';
+import 'package:supervision_icatech/utils/styles.dart';
+import 'package:supervision_icatech/view_models/view_models.dart';
 import 'package:provider/provider.dart';
 
 class Repository {
-
   static Color bgColor(BuildContext context) {
     final vm = context.watch<ViewModel>();
     return vm.isDark == true ? Styles.primaryColor : Styles.whiteColor;
@@ -22,7 +21,9 @@ class Repository {
 
   static Color navbarColor(BuildContext context) {
     final vm = context.watch<ViewModel>();
-    return vm.isDark == true ? Styles.primaryWithOpacityColor : Styles.whiteColor;
+    return vm.isDark == true
+        ? Styles.primaryWithOpacityColor
+        : Styles.whiteColor;
   }
 
   static Color selectedItemColor(BuildContext context) {
@@ -52,27 +53,37 @@ class Repository {
 
   static Color subTextColor(BuildContext context) {
     final vm = context.watch<ViewModel>();
-    return vm.isDark == true ? Styles.whiteColor.withOpacity(0.7) : Styles.primaryColor.withOpacity(0.7);
+    return vm.isDark == true
+        ? Styles.whiteColor.withOpacity(0.7)
+        : Styles.primaryColor.withOpacity(0.7);
   }
 
   static Color iconColor(BuildContext context) {
     final vm = context.watch<ViewModel>();
-    return vm.isDark == true ? Styles.whiteColor.withOpacity(0.2) : Styles.greyColor;
+    return vm.isDark == true
+        ? Styles.whiteColor.withOpacity(0.2)
+        : Styles.greyColor;
   }
 
   static Color headerColor2(BuildContext context) {
     final vm = context.watch<ViewModel>();
-    return vm.isDark == true ? Styles.primaryWithOpacityColor : Styles.greenColor;
+    return vm.isDark == true
+        ? Styles.primaryWithOpacityColor
+        : Styles.greenColor;
   }
 
   static Color accentColor(BuildContext context) {
     final vm = context.watch<ViewModel>();
-    return vm.isDark == true ? Styles.primaryWithOpacityColor : Styles.greyColor;
+    return vm.isDark == true
+        ? Styles.primaryWithOpacityColor
+        : Styles.greyColor;
   }
 
   static Color accentColor2(BuildContext context) {
     final vm = context.watch<ViewModel>();
-    return vm.isDark == true ? Styles.primaryWithOpacityColor : Colors.transparent;
+    return vm.isDark == true
+        ? Styles.primaryWithOpacityColor
+        : Colors.transparent;
   }
 
   static Color notificationColor(BuildContext context) {
@@ -94,5 +105,4 @@ class Repository {
     final vm = context.watch<ViewModel>();
     return vm.isDark == true ? Styles.whiteColor : Styles.greenColor;
   }
-
 }

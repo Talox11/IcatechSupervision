@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/utils/size_config.dart';
+import 'package:supervision_icatech/utils/size_config.dart';
 
 class Styles {
-
   static Color primaryColor = const Color(0xFF161D28);
   static Color accentColor = const Color(0xFF030C10);
   static Color primaryWithOpacityColor = const Color(0xFF212E3E);

@@ -1,51 +1,58 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:supervision_icatech/http/http_handle.dart';
 
-import 'package:flutter_banking_app/models/grupo.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
-import 'package:flutter_banking_app/utils/layouts.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
+import 'package:supervision_icatech/models/grupo.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/iconly/iconly_bold.dart';
+import 'package:supervision_icatech/utils/layouts.dart';
+import 'package:supervision_icatech/utils/styles.dart';
 
-import 'package:flutter_banking_app/views/info_grupo.dart';
-import 'package:flutter_banking_app/widgets/my_app_bar.dart';
+import 'package:supervision_icatech/views/info_grupo.dart';
+import 'package:supervision_icatech/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../widgets/separator.dart';
 
-class Wallet extends StatefulWidget {
-  const Wallet({Key? key}) : super(key: key);
+class CursosDescargados extends StatefulWidget {
+  const CursosDescargados({Key? key}) : super(key: key);
 
   @override
-  State<Wallet> createState() => _WalletState();
+  State<CursosDescargados> createState() => _CursosDescargadosState();
 }
 
-class _WalletState extends State<Wallet> {
+class _CursosDescargadosState extends State<CursosDescargados> {
   final TextEditingController _controller = TextEditingController();
   final ValueNotifier<String> searchKeywordNotifier = ValueNotifier('');
-
+  String connStatusMsg = 'Verificando conexion a internet';
+  Color connStatusColor = Color.fromARGB(255, 224, 240, 105);
   late Grupo grupoObject;
-  Future<List>? _futureSavedGrupos;
+  
 
   @override
   void initState() {
-    _futureSavedGrupos = getSaved();
+    
+    checkInternetConn().then((connected) async {
+      String msg = 'Sin conexion a internet';
+      Color color = Color.fromARGB(255, 240, 213, 105);
+      if (connected) {
+        msg = 'Con conexion a internet';
+         color = Color.fromARGB(255, 105, 240, 174);
+      }
+      setState(() {
+        connStatusMsg = msg;
+        connStatusColor = color;
+      });
+    });
     super.initState();
   }
 
-  Future<List> getSaved() async {
-    var databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'syvic_offline.db');
-    Database database = await openDatabase(path,
-        version: 1, onCreate: (Database db, int version) async {});
-    List row = await database
-        .rawQuery('SELECT * FROM tbl_grupo_temp where is_editing = 1');
-    return Future.value(row);
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +61,17 @@ class _WalletState extends State<Wallet> {
       backgroundColor: Repository.bgColor(context),
       appBar: myAppBar(
           title: 'Realizar Nueva Auditoria',
+          connStatus: connStatusMsg,
+          connStatusColor: connStatusColor,
           implyLeading: false,
           context: context),
       body: ListView(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(2),
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const Gap(20),
               Container(
                 height: 38,
                 width: size.width * 0.70,
@@ -104,7 +114,7 @@ class _WalletState extends State<Wallet> {
             ],
           ),
           FutureBuilder(
-              future: _futureSavedGrupos,
+              future: HttpHandle().getCursosDescargados(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
@@ -179,8 +189,12 @@ class _WalletState extends State<Wallet> {
                                           color: Colors.white)))),
                         ],
                       ),
-                      const Gap(24),
-                      customColumn(title: 'Clave', subtitle: grupo['clave']),
+                      infoCurso(
+                          clave: 'Clave ' + grupo['clave'],
+                          date: 'De ' +
+                              grupo['inicio'] +
+                              ' a ' +
+                              grupo['termino']),
                       const Gap(15)
                     ],
                   ),
@@ -214,6 +228,19 @@ Widget customColumn({required String title, required String subtitle}) {
   );
 }
 
+Widget infoCurso({required String clave, required String date}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(clave.toUpperCase(),
+          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5))),
+      const Gap(2),
+      Text(date.toUpperCase(),
+          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5))),
+    ],
+  );
+}
+
 inputEmptyMsg(BuildContext context) {
   // set up the buttons
 
@@ -240,4 +267,17 @@ inputEmptyMsg(BuildContext context) {
       return alert;
     },
   );
+}
+
+Future<bool> checkInternetConn() async {
+  try {
+    final result = await InternetAddress.lookup('google.com.mx');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      return true;
+    }
+    return false;
+  } on SocketException catch (_) {
+    print('not connected');
+    return false;
+  }
 }

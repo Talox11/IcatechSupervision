@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="co.tino.flutter_banking_app">
+    package="co.tino.supervision_icatech">
     <uses-permission android:name="android.permission.INTERNET"/>
     
    <application
-        android:label="ICATECH Verificadores"
+        android:label="ICATECH Supervision"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

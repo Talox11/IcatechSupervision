@@ -5,16 +5,16 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/models/alumno.dart';
-import 'package:flutter_banking_app/models/grupo.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/layouts.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
+import 'package:supervision_icatech/models/alumno.dart';
+import 'package:supervision_icatech/models/grupo.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/layouts.dart';
+import 'package:supervision_icatech/utils/styles.dart';
 
-import 'package:flutter_banking_app/widgets/buttons.dart';
-import 'package:flutter_banking_app/widgets/loadingIndicator.dart';
-import 'package:flutter_banking_app/widgets/my_app_bar.dart';
-import 'package:flutter_banking_app/widgets/separator.dart';
+import 'package:supervision_icatech/widgets/buttons.dart';
+import 'package:supervision_icatech/widgets/loadingIndicator.dart';
+import 'package:supervision_icatech/widgets/my_app_bar.dart';
+import 'package:supervision_icatech/widgets/separator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
 import 'package:postgres/postgres.dart';
@@ -40,6 +40,9 @@ class _InfoGrupoState extends State<InfoGrupo> {
   // connectivity var
 
   Future<Grupo>? _futureGrupo;
+  String connStatusMsg = 'Verificando conexion a internet';
+  Color connStatusColor = Color.fromARGB(255, 224, 240, 105);
+
   Future<Grupo> _getInfoGrupo(clave) async {
     List _listAlumnos = [];
 
@@ -82,9 +85,23 @@ class _InfoGrupoState extends State<InfoGrupo> {
           'Failed to create album.: ' + response.statusCode.toString());
     }
   }
+
   @override
   void initState() {
     var clave = widget.clave;
+
+    checkInternetConn().then((connected) async {
+      String msg = 'Sin conexion a internet';
+      Color color = Color.fromARGB(255, 240, 213, 105);
+      if (connected) {
+        msg = 'Con conexion a internet';
+        color = Color.fromARGB(255, 105, 240, 174);
+      }
+      setState(() {
+        connStatusMsg = msg;
+        connStatusColor = color;
+      });
+    });
 
     try {
       tempRecordExist('tbl_grupo_temp', 'clave',
@@ -120,6 +137,8 @@ class _InfoGrupoState extends State<InfoGrupo> {
       backgroundColor: Repository.bgColor(context),
       appBar: myAppBar(
           title: 'Informacion general del grupo',
+          connStatus: connStatusMsg,
+          connStatusColor: connStatusColor,
           implyLeading: true,
           context: context),
       body: FutureBuilder(
@@ -167,8 +186,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
                             ),
                           ),
                           const Gap(10),
-                          Text(
-                              'Reintentar',
+                          Text('Reintentar',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: Styles.icatechPurpleColor
@@ -665,6 +683,7 @@ showNoInternetConn(BuildContext context) {
     },
   );
 }
+
 
 Future removeGrupoQueue(grupo) async {
   inspect(grupo);

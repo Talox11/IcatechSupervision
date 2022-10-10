@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/view_models/view_models.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/styles.dart';
+import 'package:supervision_icatech/view_models/view_models.dart';
 import 'package:provider/provider.dart';
 
 class CustomListTile extends StatelessWidget {
@@ -14,12 +14,14 @@ class CustomListTile extends StatelessWidget {
   final BuildContext context;
 
   const CustomListTile(
-      {Key? key, required this.icon,
-        required this.title,
-        this.callback,
-        required this.color,
-        this.isDarkMode,
-        required this.context}) : super(key: key);
+      {Key? key,
+      required this.icon,
+      required this.title,
+      this.callback,
+      required this.color,
+      this.isDarkMode,
+      required this.context})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +44,19 @@ class CustomListTile extends StatelessWidget {
           style: TextStyle(fontSize: 17, color: Repository.textColor(context))),
       trailing: isDarkMode == true
           ? CupertinoSwitch(
-        thumbColor: Styles.blueColor,
-        activeColor: Repository.activeColor(context),
-        trackColor: Repository.activeColor(context),
-        value: vm.isDark,
-        onChanged: (v) {
-          vm.setPref(v);
-          vm.getPref();
-          vm.setToDark();
-        },
-      )
+              thumbColor: Styles.blueColor,
+              activeColor: Repository.activeColor(context),
+              trackColor: Repository.activeColor(context),
+              value: vm.isDark,
+              onChanged: (v) {
+                vm.setPref(v);
+                vm.getPref();
+                vm.setToDark();
+              },
+            )
           : Icon(CupertinoIcons.arrow_right,
-          color: Repository.textColor(context)),
+              color: Repository.textColor(context)),
       onTap: callback,
-    );  }
+    );
+  }
 }

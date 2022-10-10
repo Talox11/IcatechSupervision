@@ -4,16 +4,21 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/models/db_helper.dart';
-import 'package:flutter_banking_app/models/grupo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supervision_icatech/alerts/loader.dart';
+import 'package:supervision_icatech/http/http_handle.dart';
+import 'package:supervision_icatech/models/alumno.dart';
+import 'package:supervision_icatech/models/db_helper.dart';
+import 'package:supervision_icatech/models/grupo.dart';
 
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
-import 'package:flutter_banking_app/utils/layouts.dart';
-import 'package:flutter_banking_app/utils/size_config.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/iconly/iconly_bold.dart';
+import 'package:supervision_icatech/utils/layouts.dart';
+import 'package:supervision_icatech/utils/size_config.dart';
+import 'package:supervision_icatech/utils/styles.dart';
+import 'package:supervision_icatech/views/login.dart';
 
-import 'package:flutter_banking_app/widgets/loadingIndicator.dart';
+import 'package:supervision_icatech/widgets/loadingIndicator.dart';
 import 'package:gap/gap.dart';
 import 'package:http/http.dart' as http;
 import 'package:postgres/postgres.dart';
@@ -30,12 +35,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  late SharedPreferences sharedPreferences;
+  String email_sivic = '';
+  int id_sivic = 0;
   Future<List>? _futureGrupo;
   bool visible = true;
 
   @override
   void initState() {
     createTables();
+    checkSesion();
+    // getCursosPorSupervisar();
     _futureGrupo = getQueueUpload();
 
     super.initState();
@@ -93,7 +103,7 @@ class _HomeState extends State<Home> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hola supervisor' ,
+                        Text('Hola '+ sharedPreferences.getString('name')!,
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 16)),
@@ -106,6 +116,51 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                   ],
+                ),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  //onTap: _controller.hideMenu,
+                  onTap: () {
+                    Loader().showCargando(context);
+                    HttpHandle()
+                        .updateToken(id_sivic.toString())
+                        .then((valueRes) {
+                      Navigator.of(context).pop();
+                      if (valueRes == 'success') {
+                        sharedPreferences.clear();
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (BuildContext context) => LoginPage()),
+                            (route) => false);
+                      }
+                    });
+                  },
+                  child: Container(
+                    height: 40,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: <Widget>[
+                        const Icon(
+                          Icons.logout,
+                          size: 15,
+                          color: Colors.white,
+                        ),
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: const Text(
+                              'Cerrar sesión',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const Gap(25),
                 const Gap(15),
@@ -195,8 +250,6 @@ class _HomeState extends State<Home> {
         onTap: () async {
           await checkInternetConn().then((onValue) async {
             if (onValue) {
-              
-
               DialogBuilder(context).showLoadingIndicator();
               await uploadGrupo(grupo);
               await state.setState(() {
@@ -252,6 +305,13 @@ class _HomeState extends State<Home> {
     }
 
     return widgetView;
+  }
+
+  void checkSesion() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    id_sivic = sharedPreferences.getInt('id_sivyc')!;
+    email_sivic = sharedPreferences.getString('correo')!;
   }
 
   showNoInternetConn(BuildContext context) {
@@ -335,15 +395,152 @@ uploadAllGrupos(state) async {
   }
 }
 
-
-
-
-
-
-
-
 Future createTables() async {
   helperCreateTables();
+}
+
+Future getCursosPorSupervisar() async {
+  List _listAlumnos = [];
+
+  final response = await http.post(
+      Uri.parse(
+          Environment.apiUrlLaravel + '/supervision/movil/cursos-supervisar'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'idUsuario': '444',
+      }));
+
+  if (response.statusCode == 200) {
+    final jsonData = jsonDecode(response.body);
+    for (var item in jsonData) {
+      tempRecordExist('tbl_grupo_temp', 'clave', item['clave'])
+          .then((exist) async {
+        if (!exist) {
+          _listAlumnos = await _getAlumnos(item['id']);
+          inspect(_listAlumnos);
+          Grupo grupo = Grupo(
+              item['id'].toString(),
+              item['curso'],
+              item['cct'],
+              item['unidad'],
+              item['clave'],
+              item['mod'],
+              item['inicio'],
+              item['termino'],
+              item['area'],
+              item['espe'],
+              item['tcapacitacion'],
+              item['depen'],
+              item['tipo_curso']);
+          grupo.isEditing = 0;
+          grupo.isQueue = 0;
+
+          grupo.addAlumos(_listAlumnos);
+          saveTemporaly(grupo);
+        } else {
+          print('Ya existe localmente ' +
+              item['clave'] +
+              ' -> ' +
+              item['id'].toString());
+        }
+      });
+    }
+  }
+}
+
+Future<List> _getAlumnos(clave) async {
+  final response = await http.get(Uri.parse(
+      Environment.apiUrlLaravel + '/supervision/movil/alumnos/$clave'));
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Falló la conexión');
+  }
+}
+
+Future saveTemporaly(grupo) async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+
+  await database.transaction((txn) async {
+    List<Alumno> alumnos = grupo.alumnos;
+
+    txn.rawInsert(
+        'INSERT INTO tbl_grupo_temp(id_registro, curso, cct, unidad, clave, mod, inicio, termino, area, espe, tcapacitacion, depen, tipo_curso,is_editing) '
+        'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        [
+          grupo.id,
+          grupo.curso,
+          grupo.cct,
+          grupo.unidad,
+          grupo.clave,
+          grupo.mod,
+          grupo.inicio,
+          grupo.termino,
+          grupo.area,
+          grupo.espe,
+          grupo.tcapacitacion,
+          grupo.depen,
+          grupo.tipoCurso,
+          1, //is editing
+        ]);
+
+    for (var a in alumnos) {
+      txn.rawInsert(
+          'INSERT INTO alumnos_pre_temp(id_registro, id_curso, nombre, apellido_paterno, apellido_materno, correo, telefono, curp, sexo, '
+          'fecha_nacimiento, domicilio, colonia, municipio, estado, estado_civil, matricula, observaciones, calle, seccion_vota, numExt, numInt, resp_satisfaccion, com_satisfaccion) '
+          ' VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+          [
+            a.id,
+            a.idCurso,
+            a.nombre,
+            a.apellidoPaterno,
+            a.apellidoMaterno,
+            a.correo,
+            a.telefono,
+            a.curp,
+            a.sexo,
+            a.fechaNacimiento,
+            a.domicilio,
+            a.colonia,
+            a.municipio,
+            a.estado,
+            a.estadoCivil,
+            a.matricula,
+            '', //observaciones
+            '', //calle
+            '', //seccionVota
+            '', //numExt
+            '', //numInt
+            ',,,,,,,,,,,,', //resp_satisfaccion
+            ',,,,,,,,,,,,', //com_satisfaccion
+          ]);
+    }
+  });
+}
+
+Future<bool> tempRecordExist(dbTable, colum, idRegistro) async {
+  print(dbTable + ' | ' + colum + ' | ' + idRegistro);
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'syvic_offline.db');
+
+  Database database = await openDatabase(path,
+      version: 1, onCreate: (Database db, int version) async {});
+  List row = await database
+      .query(dbTable, where: '$colum = ?', whereArgs: [idRegistro]);
+  if (row.isEmpty) {
+    // database.close();
+    return false;
+  } else {
+    // database.close();
+    return true;
+  }
 }
 
 Future<bool> checkInternetConn() async {
@@ -425,6 +622,7 @@ Future uploadGrupo(grupo) async {
 }
 
 Future removeGrupoQueue(grupo) async {
+  inspect(grupo);
   var idRegistro = grupo['id_registro'];
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
@@ -434,10 +632,10 @@ Future removeGrupoQueue(grupo) async {
 
   await database.transaction((txn) async {
     var result = txn.rawDelete(
-        'DELETE FROM tbl_grupo_temp WHERE id_registro = ${idRegistro}');
+        'UPDATE tbl_grupo_temp SET active = 0, is_queue = 0 WHERE id_registro = ${idRegistro}');
 
     var result2 = txn.rawDelete(
-        'DELETE FROM alumnos_pre_temp WHERE id_curso = ${idRegistro}');
+        'UPDATE alumnos_pre_temp SET active = 0, is_queue = 0 WHERE id_curso = ${idRegistro}');
   });
 
   database.close();
