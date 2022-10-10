@@ -1,4 +1,4 @@
-import 'package:flutter_banking_app/models/alumno.dart';
+import 'package:supervision_icatech/models/alumno.dart';
 
 class Grupo {
   String id = '';
@@ -35,10 +35,10 @@ class Grupo {
   addAlumos(response) {
     for (var item in response) {
       Alumno alu = Alumno(
-        item['id'],
-        item['id_curso'],
+        item['id'].toString(),
+        item['id_curso'].toString(),
         item['nombre'],
-        item['apellido_paterno'],
+        item['apellido_paterno'] ?? '',
         item['apellido_materno'],
         item['correo'] ?? 'no cuenta con email',
         item['telefono'] ?? 'no cuenta con telefono',
@@ -47,9 +47,9 @@ class Grupo {
         item['fecha_nacimiento'],
         item['domicilio'],
         item['colonia'],
-        item['municipio'],
+        item['municipio'] ?? 'sin especificar',
         item['estado'],
-        item['estado_civil'],
+        item['estado_civil'] ?? 'sin especificar',
         item['matricula'],
       );
       alumnos.add(alu);
@@ -112,6 +112,27 @@ class Grupo {
       'tipo_curso': tipoCurso,
       'isEditing': isEditing,
       'isQueue': isQueue,
+    };
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'curso': curso,
+      'cct': cct,
+      'unidad': unidad,
+      'clave': clave,
+      'mod': mod,
+      'inicio': inicio,
+      'termino': termino,
+      'area': area,
+      'espe': espe,
+      'tcapacitacion': tcapacitacion,
+      'depen': depen,
+      'tipo_curso': tipoCurso,
+      'isEditing': isEditing,
+      'isQueue': isQueue,
+      'alumnos': alumnos,
     };
   }
 }

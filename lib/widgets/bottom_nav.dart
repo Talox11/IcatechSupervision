@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/iconly/iconly_bold.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/views/home.dart';
-import 'package:flutter_banking_app/views/profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/iconly/iconly_bold.dart';
+import 'package:supervision_icatech/utils/styles.dart';
+import 'package:supervision_icatech/views/home.dart';
+import 'package:supervision_icatech/views/list_cursos.dart';
 
-import 'package:flutter_banking_app/views/test_query.dart';
-import 'package:flutter_banking_app/views/wallet.dart';
+
+import 'package:supervision_icatech/views/test_query.dart';
+import 'package:supervision_icatech/views/downloaded_cursos.dart';
+
 
 /// This is the stateful widget that the main application instantiates.
 class BottomNav extends StatefulWidget {
@@ -18,12 +21,18 @@ class BottomNav extends StatefulWidget {
 
 /// This is the private State class that goes with MyStatefulWidget.
 class _BottomNavState extends State<BottomNav> {
+  String nombre = '';
+  String email_sivic = '';
+  int id_sivic = 0;
+  late SharedPreferences sharedPreferences;
+
+
   int _selectedIndex = 0;
   static final List<Widget> _widgetOptions = <Widget>[
     const Home(),
-    const Wallet(),
+    const DownloadCursos(),
+    const CursosDescargados(),
     const TestQuery(),
-    // const Profile(),
   ];
 
   void _onItemTapped(int index) {
@@ -32,6 +41,18 @@ class _BottomNavState extends State<BottomNav> {
     });
   }
 
+  @override
+  void initState() {
+      checkSesion();
+      super.initState();
+      // inicializarNotificacion();
+  }
+  void checkSesion() async {
+      sharedPreferences = await SharedPreferences.getInstance();
+      
+      id_sivic = sharedPreferences.getInt('id_sivyc')!;
+      email_sivic = sharedPreferences.getString('correo')!;
+   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,9 +77,9 @@ class _BottomNavState extends State<BottomNav> {
             label: 'Wallet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Chart),
-            label: 'Stats',
-          ),
+            icon: Icon(IconlyBold.Document),
+            label: 'Wallet',
+          )
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

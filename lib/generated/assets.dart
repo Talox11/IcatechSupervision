@@ -27,4 +27,6 @@ class Assets {
   static const String memoji9 = 'assets/memoji/9.png';
   static const String refresh = 'assets/memoji/refresh.png';
 
+  static const String icatechIcon = 'assets/icons/icatech-logo.png';
+
 }

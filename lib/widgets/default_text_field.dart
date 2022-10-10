@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/input_decoration.dart';
-import 'package:flutter_banking_app/utils/size_config.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/input_decoration.dart';
+import 'package:supervision_icatech/utils/size_config.dart';
+import 'package:supervision_icatech/utils/styles.dart';
 
 import 'package:gap/gap.dart';
 
@@ -71,7 +71,7 @@ class DefaultTextField extends StatelessWidget {
           textInputAction: textInputAction ?? TextInputAction.next,
           onFieldSubmitted: onFieldSubmitted,
           validator: (value) {
-            if ((value == null || value.isEmpty ) && isRequired) {
+            if ((value == null || value.isEmpty) && isRequired) {
               return 'Este campo es obligatorio';
             }
             return null;

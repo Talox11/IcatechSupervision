@@ -1,15 +1,16 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_banking_app/models/alumno.dart';
-import 'package:flutter_banking_app/widgets/buttons.dart';
-import 'package:flutter_banking_app/widgets/default_text_field.dart';
+import 'package:supervision_icatech/models/alumno.dart';
+import 'package:supervision_icatech/widgets/buttons.dart';
+import 'package:supervision_icatech/widgets/default_text_field.dart';
 
-import 'package:flutter_banking_app/widgets/my_app_bar.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/layouts.dart';
-import 'package:flutter_banking_app/utils/styles.dart';
-import 'package:flutter_banking_app/widgets/separator.dart';
+import 'package:supervision_icatech/widgets/my_app_bar.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/layouts.dart';
+import 'package:supervision_icatech/utils/styles.dart';
+import 'package:supervision_icatech/widgets/separator.dart';
 import 'package:gap/gap.dart';
 import 'package:postgres/postgres.dart';
 
@@ -29,6 +30,9 @@ class InfoAlumno extends StatefulWidget {
 }
 
 class _InfoAlumnoState extends State<InfoAlumno> {
+  String connStatusMsg = 'Verificando conexion a internet';
+  Color connStatusColor = Color.fromARGB(255, 224, 240, 105);
+
   String claveGrupo = '';
   final TextEditingController _entidadNacimiento = TextEditingController();
   final TextEditingController _seccionVota = TextEditingController();
@@ -70,11 +74,26 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   bool checkedValueNo12 = false;
   bool checkedValueSi13 = false;
   bool checkedValueNo13 = false;
+  bool checkedValueSi14 = false;
+  bool checkedValueNo14 = false;
 
   String dropdownValue = 'Selecciona una opcion';
 
   @override
   void initState() {
+    checkInternetConn().then((connected) async {
+      String msg = 'Sin conexion a internet';
+      Color color = Color.fromARGB(255, 240, 213, 105);
+      if (connected) {
+        msg = 'Con conexion a internet';
+        color = Color.fromARGB(255, 105, 240, 174);
+      }
+      setState(() {
+        connStatusMsg = msg;
+        connStatusColor = color;
+      });
+    });
+
     claveGrupo = widget.clave;
     inspect(widget.alumno);
     if (widget.alumno.respSatisfaccion != '') {
@@ -92,7 +111,11 @@ class _InfoAlumnoState extends State<InfoAlumno> {
     return Scaffold(
         backgroundColor: Repository.bgColor(context),
         appBar: myAppBar(
-            title: 'Informacion Alumno', implyLeading: true, context: context),
+            title: 'Informacion Alumno',
+            connStatus: connStatusMsg,
+            connStatusColor: connStatusColor,
+            implyLeading: true,
+            context: context),
         body: ListView(
           padding: const EdgeInsets.all(15),
           children: [
@@ -247,8 +270,8 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                 Flexible(
                   child: DefaultTextField(
                       controller: _seccionVota,
-                      title: 'Seccion Vota',
-                      label: '###',
+                      title: 'Seccion',
+                      label: '000',
                       obscure: true,
                       enabled: true,
                       isRequired: true),
@@ -258,7 +281,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   child: DefaultTextField(
                       controller: _numExt,
                       title: 'Num Ext',
-                      label: '####',
+                      label: '0000',
                       obscure: true,
                       enabled: true,
                       isRequired: true),
@@ -299,7 +322,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi1,
@@ -340,7 +362,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi2,
@@ -381,7 +402,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi3,
@@ -421,7 +441,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi4,
@@ -462,7 +481,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi5,
@@ -503,7 +521,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi6,
@@ -544,7 +561,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi7,
@@ -584,7 +600,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi8,
@@ -625,7 +640,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi9,
@@ -666,7 +680,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi10,
@@ -707,7 +720,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi11,
@@ -748,7 +760,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi12,
@@ -789,7 +800,6 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                   color: Repository.dividerColor(context),
                   thickness: 2,
                 ),
-                
                 CheckboxListTile(
                   title: const Text("SI'"),
                   value: checkedValueSi13,
@@ -816,16 +826,54 @@ class _InfoAlumnoState extends State<InfoAlumno> {
                 )
               ],
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 5),
+                    child: Text(
+                        '¿Conoces a la Directora General del Icatech, Mtra. Fabiola Lizebeth Astudillo Reyes? ',
+                        style: TextStyle(
+                            color: Repository.subTextColor(context)))),
+                Divider(
+                  color: Repository.dividerColor(context),
+                  thickness: 2,
+                ),
+                CheckboxListTile(
+                  title: const Text('SI'),
+                  value: checkedValueSi14,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueSi14 = newValue!;
+                      checkedValueNo14 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: const Text('NO'),
+                  value: checkedValueNo14,
+                  onChanged: (newValue) {
+                    setState(() {
+                      checkedValueNo14 = newValue!;
+                      checkedValueSi14 = !newValue;
+                    });
+                  },
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
+                )
+              ],
+            ),
             elevatedButton(
               color: Repository.selectedItemColor(context),
               context: context,
               callback: () {
                 try {
                   if (validateAnswers()) {
-                    
                     updateInfoAlumno(context);
                   } else {
-                    
                     showFormNoCompleted(context);
                     // DialogBuilder(context).showLoadingIndicator();
                   }
@@ -926,6 +974,11 @@ class _InfoAlumnoState extends State<InfoAlumno> {
       result = result + 'No,';
     }
     if (checkedValueSi13) {
+      result = result + 'Si';
+    } else {
+      result = result + 'No';
+    }
+    if (checkedValueSi14) {
       result = result + 'Si';
     } else {
       result = result + 'No';
@@ -1046,7 +1099,7 @@ class _InfoAlumnoState extends State<InfoAlumno> {
   setCheckedValues(Alumno alumnoInfo) {
     //set values from local db
     List valuesChecked = alumnoInfo.respSatisfaccion!.split(',');
-    
+
     if (valuesChecked[0] == 'Si') {
       checkedValueSi1 = true;
       checkedValueNo1 = false;
@@ -1205,5 +1258,18 @@ class _InfoAlumnoState extends State<InfoAlumno> {
         return alert;
       },
     );
+  }
+
+  Future<bool> checkInternetConn() async {
+    try {
+      final result = await InternetAddress.lookup('google.com.mx');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+      return false;
+    } on SocketException catch (_) {
+      print('not connected');
+      return false;
+    }
   }
 }

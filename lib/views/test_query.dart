@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_banking_app/enviroment/enviroment.dart';
-import 'package:flutter_banking_app/repo/repository.dart';
-import 'package:flutter_banking_app/utils/layouts.dart';
+import 'package:supervision_icatech/enviroment/enviroment.dart';
+import 'package:supervision_icatech/repo/repository.dart';
+import 'package:supervision_icatech/utils/layouts.dart';
 
-import 'package:flutter_banking_app/widgets/my_app_bar.dart';
+import 'package:supervision_icatech/widgets/my_app_bar.dart';
 import 'package:gap/gap.dart';
 
 import 'package:sqflite/sqflite.dart';
@@ -34,14 +34,9 @@ class _TestQueryState extends State<TestQuery> {
   void initState() {
     super.initState();
     // _getInfoGrupo();
-    
-
 
     // testQuery();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +45,8 @@ class _TestQueryState extends State<TestQuery> {
       backgroundColor: Repository.bgColor(context),
       appBar: myAppBar(
           title: 'TEST QUERY',
+          connStatus: 'conectado',
+          connStatusColor: Color.fromARGB(255, 231, 240, 105),
           implyLeading: false,
           context: context,
           hasAction: true),
@@ -78,7 +75,7 @@ class _TestQueryState extends State<TestQuery> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Repository.headerColor(context)),
-                    child: const Text('Income',
+                    child: const Text('Print table',
                         style: TextStyle(color: Colors.white, fontSize: 18)),
                   ),
                 ),
@@ -93,7 +90,7 @@ class _TestQueryState extends State<TestQuery> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.transparent),
-                    child: Text('Expenses ${_connectionStatus.toString()}',
+                    child: Text('Delete Table ',
                         style: TextStyle(
                             color: Repository.titleColor(context),
                             fontSize: 17,
@@ -109,7 +106,6 @@ class _TestQueryState extends State<TestQuery> {
   }
 }
 
-
 void testQuery() async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
@@ -119,7 +115,7 @@ void testQuery() async {
   Database database = await openDatabase(path,
       version: 1, onCreate: (Database db, int version) async {});
 
-  List<Map> list = await database.rawQuery('SELECT * FROM alumnos_pre_temp');
+  List<Map> list = await database.rawQuery('SELECT * FROM tbl_grupo_temp');
   print(list);
 }
 
@@ -159,6 +155,8 @@ void dropAndCreate() async {
           tipo_curso TEXT,
           is_editing INTEGER,
           is_queue INTEGER
+          last_auditoria DATE,
+          active INTEGER,
           createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''');
 
@@ -198,6 +196,7 @@ void dropAndCreate() async {
           numInt TEXT,
           resp_satisfaccion TEXT,
           com_satisfaccion TEXT,
+          active INTEGER,
           createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''');
 

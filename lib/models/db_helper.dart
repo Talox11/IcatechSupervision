@@ -24,7 +24,9 @@ Future helperCreateTables() async {
           depen TEXT,
           tipo_curso TEXT,
           is_editing INTEGER,
-          is_queue INTEGER
+          is_queue INTEGER,
+          last_auditoria DATE,
+          active INTEGER,
           createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''');
 
@@ -64,6 +66,7 @@ Future helperCreateTables() async {
           numInt TEXT,
           resp_satisfaccion TEXT,
           com_satisfaccion TEXT,
+          active INTEGER,
           createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )''');
 
