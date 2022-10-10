@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supervision_icatech/models/alumno.dart';
 import 'package:supervision_icatech/models/grupo.dart';
 import 'package:supervision_icatech/repo/repository.dart';
@@ -38,6 +39,8 @@ class InfoGrupo extends StatefulWidget {
 
 class _InfoGrupoState extends State<InfoGrupo> {
   // connectivity var
+  late SharedPreferences sharedPreferences;
+  int id_sivic = 0;
 
   Future<Grupo>? _futureGrupo;
   String connStatusMsg = 'Verificando conexion a internet';
@@ -90,6 +93,8 @@ class _InfoGrupoState extends State<InfoGrupo> {
   void initState() {
     var clave = widget.clave;
 
+    checkSesion();
+
     checkInternetConn().then((connected) async {
       String msg = 'Sin conexion a internet';
       Color color = Color.fromARGB(255, 240, 213, 105);
@@ -128,6 +133,13 @@ class _InfoGrupoState extends State<InfoGrupo> {
       print(e);
     }
     super.initState();
+  }
+
+  void checkSesion() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      id_sivic = sharedPreferences.getInt('id_sivyc')!;
+    });
   }
 
   @override
@@ -222,7 +234,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
                   return ListView(
                     padding: const EdgeInsets.all(15),
                     children:
-                        _showInfo(snapshot.data, size, context, widget.clave),
+                        _showInfo(snapshot.data, size, context, widget.clave, id_sivic),
                   );
                 }
             }
@@ -231,7 +243,7 @@ class _InfoGrupoState extends State<InfoGrupo> {
   }
 }
 
-List<Widget> _showInfo(dataResponse, size, context, clave) {
+List<Widget> _showInfo(dataResponse, size, context, clave, id_sivic) {
   List<Widget> widgetInfoGeneral = [];
   Grupo infoGrupo = dataResponse;
 
@@ -355,7 +367,7 @@ List<Widget> _showInfo(dataResponse, size, context, clave) {
     callback: () {
       checkInternetConn().then((connectivityExist) async {
         if (connectivityExist) {
-          showConfirmation(context, infoGrupo);
+          showConfirmation(context, infoGrupo, id_sivic);
         } else {
           showNoInternetConn(context);
           addQueue(infoGrupo, context);
@@ -558,7 +570,7 @@ Future<Alumno> getTemporalyAlumnos(idRegistro) async {
   return alumno;
 }
 
-Future uploadGrupo(Grupo grupo, context) async {
+Future uploadGrupo(Grupo grupo, context, id_sivic) async {
   String grupoAux = jsonEncode(grupo.toJson());
   String listAlumn = await getAlumnos(grupo.id);
 
@@ -567,7 +579,7 @@ Future uploadGrupo(Grupo grupo, context) async {
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
+    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn, 'id_supervisor':id_sivic.toString()}),
   );
 
   if (response.statusCode == 201) {
@@ -609,7 +621,7 @@ Future addQueue(grupo, context) async {
   });
 }
 
-showConfirmation(BuildContext context, Grupo grupo) {
+showConfirmation(BuildContext context, Grupo grupo, id_supervisor) {
   // set up the buttons
   Widget cancelButton = TextButton(
     child: const Text('Cancelar'),
@@ -621,7 +633,7 @@ showConfirmation(BuildContext context, Grupo grupo) {
     child: const Text('Aceptar'),
     onPressed: () async {
       DialogBuilder(context).showLoadingIndicator();
-      await uploadGrupo(grupo, context);
+      await uploadGrupo(grupo, context, id_supervisor);
       DialogBuilder(context).hideOpenDialog();
       Navigator.push(
           context,
@@ -683,7 +695,6 @@ showNoInternetConn(BuildContext context) {
     },
   );
 }
-
 
 Future removeGrupoQueue(grupo) async {
   inspect(grupo);

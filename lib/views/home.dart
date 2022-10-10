@@ -36,15 +36,15 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late SharedPreferences sharedPreferences;
-  String email_sivic = '';
+  String nombre_usuario = '';
   int id_sivic = 0;
   Future<List>? _futureGrupo;
   bool visible = true;
 
   @override
   void initState() {
-    createTables();
     checkSesion();
+    createTables();
     // getCursosPorSupervisar();
     _futureGrupo = getQueueUpload();
 
@@ -103,7 +103,7 @@ class _HomeState extends State<Home> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hola '+ sharedPreferences.getString('name')!,
+                        Text('Hola ' + nombre_usuario,
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 16)),
@@ -180,7 +180,7 @@ class _HomeState extends State<Home> {
                             //update
                             checkInternetConn().then((connected) async {
                               if (connected) {
-                                await showSyncDialog(context, this);
+                                await showSyncDialog(context, this, id_sivic);
                                 setState(() {
                                   _futureGrupo = getQueueUpload();
                                 });
@@ -231,7 +231,7 @@ class _HomeState extends State<Home> {
                           } else {
                             return Column(
                                 children: createListView(
-                                    context, snapshot.data, size, this));
+                                    context, snapshot.data, size, this, id_sivic));
                           }
                       }
                     })
@@ -241,7 +241,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  List<Widget> createListView(context, dataResponse, size, state) {
+  List<Widget> createListView(context, dataResponse, size, state, id_supervisor) {
     List<Widget> widgetView = [];
 
     for (var grupo in dataResponse) {
@@ -251,7 +251,7 @@ class _HomeState extends State<Home> {
           await checkInternetConn().then((onValue) async {
             if (onValue) {
               DialogBuilder(context).showLoadingIndicator();
-              await uploadGrupo(grupo);
+              await uploadGrupo(grupo, id_supervisor);
               await state.setState(() {
                 _futureGrupo = getQueueUpload();
               });
@@ -309,9 +309,10 @@ class _HomeState extends State<Home> {
 
   void checkSesion() async {
     sharedPreferences = await SharedPreferences.getInstance();
-
-    id_sivic = sharedPreferences.getInt('id_sivyc')!;
-    email_sivic = sharedPreferences.getString('correo')!;
+    setState(() {
+      id_sivic = sharedPreferences.getInt('id_sivyc')!;
+      nombre_usuario = sharedPreferences.getString('name')!;
+    });
   }
 
   showNoInternetConn(BuildContext context) {
@@ -343,7 +344,7 @@ class _HomeState extends State<Home> {
   }
 }
 
-showSyncDialog(BuildContext context, state) {
+showSyncDialog(BuildContext context, state, id_supervisor) {
   // set up the buttons
   Widget cancelButton = TextButton(
     child: const Text('Cancelar'),
@@ -354,7 +355,7 @@ showSyncDialog(BuildContext context, state) {
   Widget continueButton = TextButton(
     child: const Text('Continuar'),
     onPressed: () {
-      uploadAllGrupos(state);
+      uploadAllGrupos(state,id_supervisor);
 
       Navigator.pop(context);
     },
@@ -380,7 +381,7 @@ showSyncDialog(BuildContext context, state) {
   );
 }
 
-uploadAllGrupos(state) async {
+uploadAllGrupos(state,id_supervisor) async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
 
@@ -391,7 +392,7 @@ uploadAllGrupos(state) async {
       .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
 
   for (var grupo in gruposList) {
-    await uploadGrupo(grupo);
+    await uploadGrupo(grupo,id_supervisor);
   }
 }
 
@@ -597,9 +598,10 @@ Widget customColumn({required String title, required String subtitle}) {
   );
 }
 
-Future uploadGrupo(grupo) async {
+Future uploadGrupo(grupo, id_supervisor) async {
   String grupoAux = jsonEncode(grupo);
   String listAlumn = await getAlumnos(grupo['id_registro']);
+
   var test =
       jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn});
 
@@ -608,7 +610,7 @@ Future uploadGrupo(grupo) async {
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn}),
+    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn,'id_supervisor':id_supervisor.toString()}),
   );
 
   if (response.statusCode == 201) {
