@@ -182,7 +182,8 @@ class _DownloadCursosState extends State<DownloadCursos> {
                           date: 'De ' +
                               grupo['inicio'] +
                               ' a ' +
-                              grupo['termino']),
+                              grupo['termino'],
+                              dias: grupo['dia']),
                       const Gap(15),
                     ],
                   ),
@@ -216,7 +217,7 @@ Widget customColumn({required String title, required String subtitle}) {
   );
 }
 
-Widget infoCurso({required String clave, required String date}) {
+Widget infoCurso({required String clave, required String date, required String dias}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -224,6 +225,8 @@ Widget infoCurso({required String clave, required String date}) {
           style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5))),
       const Gap(2),
       Text(date.toUpperCase(),
+          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5))),
+      Text(dias.toUpperCase(),
           style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5))),
     ],
   );
