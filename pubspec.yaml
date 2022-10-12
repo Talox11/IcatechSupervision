@@ -69,6 +69,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/ca/
     - assets/memoji/
     - assets/cards/
     - assets/icons/icatech-logo.png

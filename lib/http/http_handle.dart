@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supervision_icatech/enviroment/enviroment.dart';
 import 'package:supervision_icatech/models/alumno.dart';
@@ -19,16 +20,20 @@ class HttpHandle {
     path2 = 'http://10.0.2.2:9000'; //siata
   }
   Future auth(String email, String password) async {
-    
     try {
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse(Environment.apiUrlLaravel + '/sivycMovil/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8'
         },
         body:
             jsonEncode(<String, String>{'email': email, 'password': password}),
-      );
+      )
+          .timeout(const Duration(seconds: 30), onTimeout: () {
+        return http.Response('error', 408);
+      });
+
       inspect(response);
       if (response.statusCode == 200) {
         String body = utf8.decode(response.bodyBytes);
@@ -36,6 +41,7 @@ class HttpHandle {
       }
       return null;
     } catch (e) {
+      inspect(e);
       return e;
     }
   }
@@ -74,6 +80,7 @@ class HttpHandle {
 
   Future getCursosPorSupervisar() async {
     List listaCursos = [];
+    int idSupervisor = await idAuthSupervisor();
     final response = await http.post(
         Uri.parse(
             Environment.apiUrlLaravel + '/supervision/movil/cursos-supervisar'),
@@ -81,14 +88,38 @@ class HttpHandle {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'idUsuario': '444',
+          'idUsuario': idSupervisor.toString(),
         }));
 
     if (response.statusCode == 200) {
       listaCursos = jsonDecode(response.body);
     }
-
     return listaCursos;
+  }
+
+  Future historialCursosSupervisados() async {
+    int idSupervisor = await idAuthSupervisor();
+    List listaCursos = [];
+
+    final response = await http.post(
+        Uri.parse(Environment.apiUrlNode + '/historial-supervisiones'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'id_supervisor': idSupervisor.toString(),
+        }));
+
+    if (response.statusCode == 200) {
+      listaCursos = jsonDecode(response.body);
+    inspect(listaCursos);
+    }
+    return listaCursos;
+  }
+
+  Future idAuthSupervisor() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences.getInt('id_sivyc')!;
   }
 
   Future descargarCurso(clave) async {

@@ -16,6 +16,7 @@ import 'package:supervision_icatech/utils/iconly/iconly_bold.dart';
 import 'package:supervision_icatech/utils/layouts.dart';
 import 'package:supervision_icatech/utils/size_config.dart';
 import 'package:supervision_icatech/utils/styles.dart';
+import 'package:supervision_icatech/views/historial_supervisiones.dart';
 import 'package:supervision_icatech/views/login.dart';
 
 import 'package:supervision_icatech/widgets/loadingIndicator.dart';
@@ -122,18 +123,12 @@ class _HomeState extends State<Home> {
                   //onTap: _controller.hideMenu,
                   onTap: () {
                     Loader().showCargando(context);
-                    HttpHandle()
-                        .updateToken(id_sivic.toString())
-                        .then((valueRes) {
-                      Navigator.of(context).pop();
-                      if (valueRes == 'success') {
-                        sharedPreferences.clear();
-                        Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (BuildContext context) => LoginPage()),
-                            (route) => false);
-                      }
-                    });
+                    sharedPreferences.clear();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => LoginPage()),
+                        (route) => false);
                   },
                   child: Container(
                     height: 40,
@@ -195,7 +190,27 @@ class _HomeState extends State<Home> {
                               shape: BoxShape.circle,
                               color: const Color(0xFFFB6A4B).withOpacity(0.15),
                             ),
-                            child: const Icon(IconlyBold.Upload,
+                            child: const Icon(IconlyBold.Paper_Upload,
+                                color: Color(0xFFFB6A4B)),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            //update
+                            
+                             Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          const HistorialSupervisiones() ),
+                                  (route) => true);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFFB6A4B).withOpacity(0.15),
+                            ),
+                            child: const Icon(IconlyBold.Document,
                                 color: Color(0xFFFB6A4B)),
                           ),
                         )
@@ -230,8 +245,8 @@ class _HomeState extends State<Home> {
                             );
                           } else {
                             return Column(
-                                children: createListView(
-                                    context, snapshot.data, size, this, id_sivic));
+                                children: createListView(context, snapshot.data,
+                                    size, this, id_sivic));
                           }
                       }
                     })
@@ -241,7 +256,8 @@ class _HomeState extends State<Home> {
     );
   }
 
-  List<Widget> createListView(context, dataResponse, size, state, id_supervisor) {
+  List<Widget> createListView(
+      context, dataResponse, size, state, id_supervisor) {
     List<Widget> widgetView = [];
 
     for (var grupo in dataResponse) {
@@ -355,7 +371,7 @@ showSyncDialog(BuildContext context, state, id_supervisor) {
   Widget continueButton = TextButton(
     child: const Text('Continuar'),
     onPressed: () {
-      uploadAllGrupos(state,id_supervisor);
+      uploadAllGrupos(state, id_supervisor);
 
       Navigator.pop(context);
     },
@@ -381,7 +397,7 @@ showSyncDialog(BuildContext context, state, id_supervisor) {
   );
 }
 
-uploadAllGrupos(state,id_supervisor) async {
+uploadAllGrupos(state, id_supervisor) async {
   var databasesPath = await getDatabasesPath();
   String path = join(databasesPath, 'syvic_offline.db');
 
@@ -392,7 +408,7 @@ uploadAllGrupos(state,id_supervisor) async {
       .rawQuery('SELECT * FROM tbl_grupo_temp where is_queue = 1');
 
   for (var grupo in gruposList) {
-    await uploadGrupo(grupo,id_supervisor);
+    await uploadGrupo(grupo, id_supervisor);
   }
 }
 
@@ -610,7 +626,11 @@ Future uploadGrupo(grupo, id_supervisor) async {
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(<String, String>{'grupo': grupoAux, 'alumnos': listAlumn,'id_supervisor':id_supervisor.toString()}),
+    body: jsonEncode(<String, String>{
+      'grupo': grupoAux,
+      'alumnos': listAlumn,
+      'id_supervisor': id_supervisor.toString()
+    }),
   );
 
   if (response.statusCode == 201) {
