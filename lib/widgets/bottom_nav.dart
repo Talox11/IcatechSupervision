@@ -65,11 +65,11 @@ class _BottomNavState extends State<BottomNav> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Document),
+            icon: Icon(IconlyBold.Paper_Download),
             label: 'Wallet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconlyBold.Document),
+            icon: Icon(IconlyBold.Work),
             label: 'Wallet',
           )
         ],
