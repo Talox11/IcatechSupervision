@@ -105,48 +105,10 @@ class _HistorialSupervisionesState extends State<HistorialSupervisiones> {
     // List listGrupos = omitDownloadedCurso(dataResponse);
 
     widgetView.add(separatorText(
-        context: context, text: 'Cursos Disponibles para supervision'));
+        context: context, text: 'Cursos que has supervisado'));
     for (var grupo in dataResponse) {
       widgetView.add(const Gap(15));
       widgetView.add(InkWell(
-        onTap: () {
-          _controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: _controller.text.length));
-          showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    ListTile(
-                      leading: new Icon(Icons.download),
-                      title: new Text('Descargar'),
-                      onTap: () {
-                        HttpHandle()
-                            .descargarCurso(grupo['clave'])
-                            .then((value) {
-                          if (value == 'success') {
-                            successDownload(context);
-                          } else {
-                            print(value);
-                          }
-                        });
-                        // state.setState({
-                        //   _listGrupos = HttpHandle().getCursosPorSupervisar()
-                        // });
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                );
-              });
-          // descargarGrupo
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => InfoGrupo(clave: grupo.clave),
-          //     ));
-        },
         child: FittedBox(
           child: SizedBox(
             height: size.height * 0.15,
